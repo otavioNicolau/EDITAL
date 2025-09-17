@@ -144,9 +144,46 @@ const blocks = [
   }
 ]
 
+// GET /api/seed - Verificar status do banco
+export async function GET() {
+  try {
+    const blocksCount = await prisma.block.count()
+    const topicsCount = await prisma.topic.count()
+    const itemsCount = await prisma.studyItem.count()
+    
+    return NextResponse.json({
+      status: blocksCount > 0 ? 'seeded' : 'empty',
+      counts: {
+        blocks: blocksCount,
+        topics: topicsCount,
+        items: itemsCount
+      }
+    })
+  } catch (error) {
+    console.error('Erro ao verificar status do banco:', error)
+    return NextResponse.json(
+      { error: 'Erro ao verificar status do banco' },
+      { status: 500 }
+    )
+  }
+}
+
 export async function POST() {
   try {
-    // Limpar dados existentes
+    console.log('🌱 Iniciando seed do banco de dados via API...')
+
+    // Verificar se já existem dados no banco
+    const existingBlocks = await prisma.block.count()
+    if (existingBlocks > 0) {
+      console.log('✅ Banco já possui dados, pulando seed.')
+      return NextResponse.json({ 
+        success: true,
+        message: 'Banco já possui dados, seed não executada',
+        blocksCount: existingBlocks 
+      })
+    }
+
+    // Limpar dados existentes (só por segurança)
     await prisma.review.deleteMany()
     await prisma.studySession.deleteMany()
     await prisma.studyItem.deleteMany()
@@ -180,14 +217,18 @@ export async function POST() {
     const totalBlocks = await prisma.block.count()
     const totalTopics = await prisma.topic.count()
 
+    console.log(`✅ Seed executada com sucesso! ${totalBlocks} blocos e ${totalTopics} tópicos criados.`)
+
     return NextResponse.json({
       success: true,
-      message: `Seed executado com sucesso! Criados ${totalBlocks} blocos e ${totalTopics} tópicos.`
+      message: `Seed executado com sucesso! Criados ${totalBlocks} blocos e ${totalTopics} tópicos.`,
+      blocksCreated: totalBlocks,
+      topicsCreated: totalTopics
     })
   } catch (error) {
-    console.error('Erro no seed:', error)
+    console.error('❌ Erro ao executar seed:', error)
     return NextResponse.json(
-      { success: false, error: 'Erro ao executar seed' },
+      { success: false, error: 'Erro ao executar seed', details: error instanceof Error ? error.message : 'Erro desconhecido' },
       { status: 500 }
     )
   }

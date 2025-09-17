@@ -1,6 +1,3 @@
 {
-  "/api/blocks/[id]/route": "app/api/blocks/[id]/route.js",
-  "/api/blocks/stats/route": "app/api/blocks/stats/route.js",
-  "/blocos/[id]/page": "app/blocos/[id]/page.js",
-  "/blocos/page": "app/blocos/page.js"
+  "/api/seed/route": "app/api/seed/route.js"
 }
