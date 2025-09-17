@@ -6,60 +6,45 @@
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-    "/topicos/[id]/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/topicos/[id]/page.js"
-    ],
-    "/api/blocks/[id]/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/blocks/[id]/route.js"
-    ],
     "/blocos/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/blocos/page.js"
     ],
-    "/api/blocks/route": [
+    "/api/blocks/stats/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/api/blocks/route.js"
+      "static/chunks/app/api/blocks/stats/route.js"
     ],
     "/blocos/[id]/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/blocos/[id]/page.js"
     ],
-    "/api/study-items/route": [
+    "/api/blocks/[id]/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/api/study-items/route.js"
+      "static/chunks/app/api/blocks/[id]/route.js"
+    ],
+    "/topicos/[id]/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/topicos/[id]/page.js"
     ],
     "/api/topics/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/api/topics/route.js"
     ],
-    "/api/topics/[id]/route": [
+    "/api/study-items/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/api/topics/[id]/route.js"
+      "static/chunks/app/api/study-items/route.js"
     ],
     "/revisao/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/revisao/page.js"
-    ],
-    "/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/page.js"
-    ],
-    "/api/metrics/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/metrics/route.js"
     ],
     "/estudo/page": [
       "static/chunks/webpack.js",
@@ -70,6 +55,16 @@
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/api/sessions/route.js"
+    ],
+    "/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/page.js"
+    ],
+    "/api/metrics/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/metrics/route.js"
     ]
   }
 }

@@ -68,7 +68,7 @@ interface Block {
 
 export default function BlocosPage() {
   const router = useRouter()
-  const [blocks, setBlocks] = useState<Block[]>([])
+  const [blocks, setBlocks] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
@@ -83,6 +83,35 @@ export default function BlocosPage() {
 
   useEffect(() => {
     fetchBlocks()
+    
+    // Listener para recarregar quando voltar para a página
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchBlocks()
+      }
+    }
+    
+    const handleFocus = () => {
+      fetchBlocks()
+    }
+    
+    // Listener para mudanças no localStorage (quando outras páginas atualizam dados)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'blocks-updated') {
+        fetchBlocks()
+        localStorage.removeItem('blocks-updated')
+      }
+    }
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('focus', handleFocus)
+    window.addEventListener('storage', handleStorageChange)
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('focus', handleFocus)
+      window.removeEventListener('storage', handleStorageChange)
+    }
   }, [])
 
   const validateForm = () => {
@@ -153,7 +182,7 @@ export default function BlocosPage() {
   const fetchBlocks = async () => {
     try {
       const timestamp = new Date().getTime();
-      const response = await fetch(`/api/blocks?t=${timestamp}`, {
+      const response = await fetch(`/api/blocks/stats?t=${timestamp}`, {
         cache: 'no-cache',
         headers: {
           'Cache-Control': 'no-cache',
@@ -255,7 +284,7 @@ export default function BlocosPage() {
                       <CheckCircle className="h-6 w-6 text-success" />
                     </div>
                   </div>
-                  <h3 className="h2 mb-1">{blocks.filter(b => b.topics.every(t => t.status === 'REVIEWED')).length}</h3>
+                  <h3 className="h2 mb-1">{blocks.filter((b: any) => b.topicStats.REVIEWED > 0 && b.topicStats.PLANNED === 0 && b.topicStats.STUDYING === 0).length}</h3>
                   <p className="text-muted mb-0">Blocos Concluídos</p>
                 </div>
               </div>
@@ -268,7 +297,7 @@ export default function BlocosPage() {
                       <Clock className="h-6 w-6 text-warning" />
                     </div>
                   </div>
-                  <h3 className="h2 mb-1">{blocks.filter(b => b.topics.some(t => t.status === 'STUDYING')).length}</h3>
+                  <h3 className="h2 mb-1">{blocks.filter((b: any) => b.topicStats.STUDYING > 0 || (b.topicStats.REVIEWED > 0 && (b.topicStats.PLANNED > 0 || b.topicStats.STUDYING > 0))).length}</h3>
                   <p className="text-muted mb-0">Em Progresso</p>
                 </div>
               </div>
@@ -281,7 +310,7 @@ export default function BlocosPage() {
                       <Circle className="h-6 w-6 text-secondary" />
                     </div>
                   </div>
-                  <h3 className="h2 mb-1">{blocks.filter(b => b.topics.every(t => t.status === 'PLANNED')).length}</h3>
+                  <h3 className="h2 mb-1">{blocks.filter((b: any) => b.topicStats.STUDYING === 0 && b.topicStats.REVIEWED === 0).length}</h3>
                   <p className="text-muted mb-0">Não Iniciados</p>
                 </div>
               </div>
@@ -294,8 +323,9 @@ export default function BlocosPage() {
           <h2 className="h4 mb-3">Seus Blocos de Estudo</h2>
           <div className="row g-4">
             {blocks.map((block) => {
-              const completedTopics = block.topics.filter(t => t.status === 'REVIEWED').length
-              const progress = block.topics.length > 0 ? Math.round((completedTopics / block.topics.length) * 100) : 0
+              const completedItems = block.itemStats?.DONE || 0
+              const totalItems = block.itemStats?.total || 0
+              const progress = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0
               
               return (
                 <div key={block.id} className="col-12 col-lg-6 col-xl-4">
@@ -379,28 +409,36 @@ export default function BlocosPage() {
                           </div>
                         </div>
 
-                        {/* Estatísticas dos Tópicos */}
+                        {/* Estatísticas dos Itens */}
                         <div className="row g-2 mb-3">
-                          <div className="col-4">
+                          <div className="col-3">
                             <div className="text-center p-2 bg-primary bg-opacity-10 rounded-3 border border-primary border-opacity-25">
-                              <div className="h5 fw-bold text-primary mb-0">{block.topics.length}</div>
+                              <div className="h5 fw-bold text-primary mb-0">{block.itemStats?.total || 0}</div>
                               <div className="small text-primary">Total</div>
                             </div>
                           </div>
-                          <div className="col-4">
-                            <div className="text-center p-2 bg-success bg-opacity-10 rounded-3 border border-success border-opacity-25">
-                              <div className="h5 fw-bold text-success mb-0">
-                                {block.topics.filter(t => t.status === 'REVIEWED').length}
+                          <div className="col-3">
+                            <div className="text-center p-2 bg-secondary bg-opacity-10 rounded-3 border border-secondary border-opacity-25">
+                              <div className="h5 fw-bold text-secondary mb-0">
+                                {block.itemStats?.TO_STUDY || 0}
                               </div>
-                              <div className="small text-success">Concluídos</div>
+                              <div className="small text-secondary">Pendentes</div>
                             </div>
                           </div>
-                          <div className="col-4">
+                          <div className="col-3">
                             <div className="text-center p-2 bg-warning bg-opacity-10 rounded-3 border border-warning border-opacity-25">
                               <div className="h5 fw-bold text-warning mb-0">
-                                {block.topics.filter(t => t.status === 'STUDYING').length}
+                                {block.itemStats?.IN_PROGRESS || 0}
                               </div>
-                              <div className="small text-warning">Estudando</div>
+                              <div className="small text-warning">Em Estudo</div>
+                            </div>
+                          </div>
+                          <div className="col-3">
+                            <div className="text-center p-2 bg-success bg-opacity-10 rounded-3 border border-success border-opacity-25">
+                              <div className="h5 fw-bold text-success mb-0">
+                                {block.itemStats?.DONE || 0}
+                              </div>
+                              <div className="small text-success">Concluídos</div>
                             </div>
                           </div>
                         </div>
@@ -409,7 +447,7 @@ export default function BlocosPage() {
                         {block.topics.length > 0 && (
                           <div className="mb-3">
                             <h6 className="small fw-medium text-body mb-2">Tópicos:</h6>
-                            {block.topics.slice(0, 3).map((topic) => (
+                            {block.topics.slice(0, 3).map((topic: any) => (
                               <div key={topic.id} className="d-flex align-items-center gap-2 mb-1">
                                 <div className={`rounded-circle ${
                                   topic.status === 'REVIEWED' ? 'bg-success' :

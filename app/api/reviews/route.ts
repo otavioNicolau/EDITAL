@@ -150,6 +150,9 @@ export async function POST(request: NextRequest) {
         where: { id: validatedData.topicId },
         data: { status: newStatus },
       });
+      
+      // Notificar que os blocos foram atualizados
+      // Isso será capturado pela página de blocos via localStorage
     }
 
     return NextResponse.json({

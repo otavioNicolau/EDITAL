@@ -1,11 +1,14 @@
 {
-  "/api/blocks/route": "app/api/blocks/route.js",
-  "/api/topics/route": "app/api/topics/route.js",
-  "/api/study-items/route": "app/api/study-items/route.js",
+  "/api/blocks/stats/route": "app/api/blocks/stats/route.js",
   "/api/blocks/[id]/route": "app/api/blocks/[id]/route.js",
+  "/api/study-items/route": "app/api/study-items/route.js",
+  "/api/topics/route": "app/api/topics/route.js",
+  "/api/sessions/route": "app/api/sessions/route.js",
+  "/api/metrics/route": "app/api/metrics/route.js",
   "/blocos/page": "app/blocos/page.js",
-  "/blocos/[id]/page": "app/blocos/[id]/page.js",
   "/topicos/[id]/page": "app/topicos/[id]/page.js",
-  "/page": "app/page.js",
-  "/estudo/page": "app/estudo/page.js"
+  "/revisao/page": "app/revisao/page.js",
+  "/blocos/[id]/page": "app/blocos/[id]/page.js",
+  "/estudo/page": "app/estudo/page.js",
+  "/page": "app/page.js"
 }

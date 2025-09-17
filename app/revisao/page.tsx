@@ -76,6 +76,9 @@ export default function RevisaoPage() {
       if (response.ok) {
         setReviewsCompleted(prev => prev + 1)
         
+        // Notificar outras páginas que os blocos foram atualizados
+        localStorage.setItem('blocks-updated', Date.now().toString())
+        
         // Próximo item ou finalizar
         if (currentItemIndex < studyItems.length - 1) {
           setCurrentItemIndex(prev => prev + 1)

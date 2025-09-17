@@ -142,6 +142,9 @@ export default function BlockDetailPage() {
         setNewTopicStatus('PLANNED')
         setShowCreateDialog(false)
         fetchBlock()
+        
+        // Notificar outras páginas que os blocos foram atualizados
+        localStorage.setItem('blocks-updated', Date.now().toString())
       }
     } catch (error) {
       console.error('Erro ao criar tópico:', error)
@@ -169,6 +172,9 @@ export default function BlockDetailPage() {
         setNewTopicName('')
         setNewTopicDescription('')
         fetchBlock()
+        
+        // Notificar outras páginas que os blocos foram atualizados
+        localStorage.setItem('blocks-updated', Date.now().toString())
       }
     } catch (error) {
       console.error('Erro ao atualizar tópico:', error)
@@ -186,6 +192,9 @@ export default function BlockDetailPage() {
       if (response.ok) {
         setDeletingTopic(null)
         fetchBlock()
+        
+        // Notificar outras páginas que os blocos foram atualizados
+        localStorage.setItem('blocks-updated', Date.now().toString())
       }
     } catch (error) {
       console.error('Erro ao excluir tópico:', error)
