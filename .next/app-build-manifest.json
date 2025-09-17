@@ -1,10 +1,5 @@
 {
   "pages": {
-    "/api/blocks/stats/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/blocks/stats/route.js"
-    ],
     "/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
@@ -21,15 +16,15 @@
       "static/chunks/main-app.js",
       "static/chunks/app/api/blocks/[id]/route.js"
     ],
-    "/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/page.js"
-    ],
     "/blocos/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/blocos/page.js"
+    ],
+    "/api/blocks/stats/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/blocks/stats/route.js"
     ]
   }
 }
