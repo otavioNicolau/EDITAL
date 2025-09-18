@@ -7,8 +7,67 @@ import fs from 'fs'
 const execAsync = promisify(exec)
 const prisma = new PrismaClient()
 
+interface DiagnosticFiles {
+  envFile: boolean
+  prismaSchema: boolean
+  sqliteDb: boolean
+  packageJson: boolean
+  dbSize?: string
+  dbLastModified?: string
+}
+
+interface DiagnosticEnvironment {
+  NODE_ENV?: string
+  DATABASE_URL: string
+  NEXTAUTH_URL: string
+  NEXTAUTH_SECRET: string
+  platform: string
+  nodeVersion: string
+  cwd: string
+}
+
+interface DiagnosticDatabase {
+  status?: string
+  connection?: string
+  counts?: any
+  writeTest?: string
+  writeError?: string
+  error?: string
+  code?: string
+  totalRecords?: number
+}
+
+interface DiagnosticSystem {
+  os?: string
+  memory?: any
+  uptime?: number
+  loadAverage?: number[]
+  relevantProcesses?: number
+  processCheck?: string
+  error?: string
+  platform?: string
+}
+
+interface Analysis {
+  overallStatus: string
+  readyForSeed: boolean
+  criticalIssues: string[]
+  recommendations: string[]
+}
+
+interface Diagnostics {
+  timestamp: string
+  environment: DiagnosticEnvironment | {}
+  database: DiagnosticDatabase | {}
+  system: DiagnosticSystem | {}
+  files: DiagnosticFiles | {}
+  errors: string[]
+  suggestions: string[]
+  analysis?: Analysis
+}
+
 export async function GET() {
-  const diagnostics = {
+  const diagnostics: Diagnostics = {
     timestamp: new Date().toISOString(),
     environment: {},
     database: {},
@@ -37,16 +96,17 @@ export async function GET() {
         prismaSchema: fs.existsSync('prisma/schema.prisma'),
         sqliteDb: fs.existsSync('prisma/dev.db'),
         packageJson: fs.existsSync('package.json')
-      }
+      } as DiagnosticFiles
 
       // Informações do banco SQLite se existir
-      if (diagnostics.files.sqliteDb) {
+      const files = diagnostics.files as DiagnosticFiles
+      if (files.sqliteDb) {
         const stats = fs.statSync('prisma/dev.db')
-        diagnostics.files.dbSize = `${(stats.size / 1024).toFixed(2)} KB`
-        diagnostics.files.dbLastModified = stats.mtime.toISOString()
+        files.dbSize = `${(stats.size / 1024).toFixed(2)} KB`
+        files.dbLastModified = stats.mtime.toISOString()
       }
     } catch (fileError) {
-      diagnostics.errors.push(`Erro ao verificar arquivos: ${fileError.message}`)
+      diagnostics.errors.push(`Erro ao verificar arquivos: ${fileError instanceof Error ? fileError.message : String(fileError)}`)
     }
 
     // 3. Teste de Conexão com Banco de Dados
@@ -75,7 +135,8 @@ export async function GET() {
         }
 
         // Verificar se o banco está vazio
-        if (diagnostics.database.totalRecords === 0) {
+        const database = diagnostics.database as DiagnosticDatabase
+        if (database.totalRecords === 0) {
           diagnostics.suggestions.push('Banco vazio - executar seed para popular dados')
         }
 
@@ -93,15 +154,17 @@ export async function GET() {
             where: { id: testBlock.id }
           })
 
-          diagnostics.database.writeTest = 'success'
+          const database = diagnostics.database as DiagnosticDatabase
+          database.writeTest = 'success'
         } catch (writeError) {
-          diagnostics.database.writeTest = 'failed'
-          diagnostics.database.writeError = writeError.message
-          diagnostics.errors.push(`Erro de escrita: ${writeError.message}`)
-          
-          if (writeError.message.includes('READONLY')) {
+          const database = diagnostics.database as DiagnosticDatabase
+          database.writeTest = 'failed'
+          database.writeError = writeError instanceof Error ? writeError.message : String(writeError)
+        diagnostics.errors.push(`Erro de escrita: ${writeError instanceof Error ? writeError.message : String(writeError)}`)
+        
+        if ((writeError instanceof Error ? writeError.message : String(writeError)).includes('READONLY')) {
             diagnostics.suggestions.push('Banco em modo somente leitura - verificar permissões')
-          } else if (writeError.message.includes('locked')) {
+          } else if ((writeError instanceof Error ? writeError.message : String(writeError)).includes('locked')) {
             diagnostics.suggestions.push('Banco bloqueado - verificar processos concorrentes')
           }
         }
@@ -109,17 +172,18 @@ export async function GET() {
       } catch (dbError) {
         diagnostics.database = {
           status: 'error',
-          error: dbError.message,
-          code: dbError.code
+          error: dbError instanceof Error ? dbError.message : String(dbError),
+          code: (dbError as any).code
         }
-        diagnostics.errors.push(`Erro de conexão: ${dbError.message}`)
+        diagnostics.errors.push(`Erro de conexão: ${dbError instanceof Error ? dbError.message : String(dbError)}`)
         
         // Sugestões baseadas no tipo de erro
-        if (dbError.message.includes('ENOENT')) {
+        const errorMsg = dbError instanceof Error ? dbError.message : String(dbError)
+        if (errorMsg.includes('ENOENT')) {
           diagnostics.suggestions.push('Arquivo de banco não encontrado - executar migrações')
-        } else if (dbError.message.includes('EACCES')) {
+        } else if (errorMsg.includes('EACCES')) {
           diagnostics.suggestions.push('Problema de permissões - verificar ownership dos arquivos')
-        } else if (dbError.message.includes('Connection')) {
+        } else if (errorMsg.includes('Connection')) {
           diagnostics.suggestions.push('Problema de conectividade - verificar se o banco está rodando')
         }
       }
@@ -140,14 +204,16 @@ export async function GET() {
         // Verificar processos relevantes
         try {
           const { stdout: processInfo } = await execAsync('ps aux | grep -E "(postgres|mysql|nginx|pm2)" | grep -v grep')
-          diagnostics.system.relevantProcesses = processInfo.split('\n').filter(line => line.trim()).length
+          const system = diagnostics.system as DiagnosticSystem
+          system.relevantProcesses = processInfo.split('\n').filter(line => line.trim()).length
         } catch (processError) {
-          diagnostics.system.processCheck = 'failed'
+          const system = diagnostics.system as DiagnosticSystem
+          system.processCheck = 'failed'
         }
         
       } catch (sysError) {
         diagnostics.system = {
-          error: `Não foi possível obter informações do sistema: ${sysError.message}`,
+          error: `Não foi possível obter informações do sistema: ${sysError instanceof Error ? sysError.message : String(sysError)}`,
           platform: process.platform
         }
       }
@@ -159,15 +225,16 @@ export async function GET() {
     }
 
     // 5. Análise e Recomendações
-    const analysis = {
+    const analysis: Analysis = {
       overallStatus: 'unknown',
       readyForSeed: false,
       criticalIssues: [],
       recommendations: []
     }
 
-    if (diagnostics.database.status === 'connected') {
-      if (diagnostics.database.writeTest === 'success') {
+    const database = diagnostics.database as DiagnosticDatabase
+    if (database.status === 'connected') {
+      if (database.writeTest === 'success') {
         analysis.overallStatus = 'healthy'
         analysis.readyForSeed = true
         analysis.recommendations.push('Sistema funcionando - pode executar seed')
@@ -181,11 +248,12 @@ export async function GET() {
       analysis.recommendations.push('Corrigir configuração do banco antes de prosseguir')
     }
 
-    if (!diagnostics.files.envFile) {
+    const files = diagnostics.files as DiagnosticFiles
+    if (!files.envFile) {
       analysis.criticalIssues.push('Arquivo .env não encontrado')
     }
 
-    if (!diagnostics.files.prismaSchema) {
+    if (!files.prismaSchema) {
       analysis.criticalIssues.push('Schema do Prisma não encontrado')
     }
 
@@ -194,7 +262,7 @@ export async function GET() {
     return NextResponse.json(diagnostics)
     
   } catch (error) {
-    diagnostics.errors.push(`Erro geral: ${error.message}`)
+    diagnostics.errors.push(`Erro geral: ${error instanceof Error ? error.message : String(error)}`)
     diagnostics.analysis = {
       overallStatus: 'error',
       readyForSeed: false,
@@ -227,7 +295,7 @@ export async function POST(request: Request) {
           return NextResponse.json({
             success: false,
             action: 'migrate',
-            error: error.message
+            error: error instanceof Error ? error.message : String(error)
           }, { status: 500 })
         }
         
@@ -244,7 +312,7 @@ export async function POST(request: Request) {
           return NextResponse.json({
             success: false,
             action: 'generate',
-            error: error.message
+            error: error instanceof Error ? error.message : String(error)
           }, { status: 500 })
         }
         
@@ -258,7 +326,7 @@ export async function POST(request: Request) {
   } catch (error) {
     return NextResponse.json({
       success: false,
-      error: error.message
+      error: error instanceof Error ? error.message : String(error)
     }, { status: 500 })
   }
 }
