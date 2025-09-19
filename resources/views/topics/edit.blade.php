@@ -51,6 +51,14 @@
                             </div>
 
                             <div class="mb-3">
+                                <label for="discipline_id" class="form-label">Disciplina *</label>
+                                <select class="form-select" id="discipline_id" name="discipline_id" required>
+                                    <option value="">Selecione uma disciplina...</option>
+                                </select>
+                                <div class="invalid-feedback"></div>
+                            </div>
+
+                            <div class="mb-3">
                                 <label for="description" class="form-label">Descrição</label>
                                 <textarea class="form-control" id="description" name="description" rows="3" 
                                     placeholder="Descreva o conteúdo e objetivos deste tópico..."></textarea>
@@ -143,12 +151,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const nameInput = document.getElementById('name');
     const statusSelect = document.getElementById('status');
     const blockSelect = document.getElementById('block_id');
+    const disciplineSelect = document.getElementById('discipline_id');
     const descriptionTextarea = document.getElementById('description');
     const tagsInput = document.getElementById('tags');
 
     // Event listeners
     topicEditForm.addEventListener('submit', handleSubmit);
     cancelBtn.addEventListener('click', handleCancel);
+    blockSelect.addEventListener('change', handleBlockChange);
+    disciplineSelect.addEventListener('change', syncBlockFromDiscipline);
 
     // Carregar dados
     loadData();
@@ -169,8 +180,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             currentTopic = await topicResponse.json();
             const blocksData = await blocksResponse.json();
-            // O BlockController retorna { data: blocks, total: count }
-            blocks = blocksData.data || [];
+            blocks = Array.isArray(blocksData) ? blocksData : (blocksData.data || []);
 
             populateForm();
             renderTopicInfo();
@@ -182,33 +192,95 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function populateForm() {
-        // Preencher blocos
-        blockSelect.innerHTML = '<option value="">Selecione um bloco...</option>';
-        blocks.forEach(block => {
-            const option = document.createElement('option');
-            option.value = block.id;
-            option.textContent = block.name;
-            if (block.id === currentTopic.block_id) {
-                option.selected = true;
-            }
-            blockSelect.appendChild(option);
-        });
+        renderBlockOptions();
+        syncBlockSelection();
 
-        // Preencher campos
         nameInput.value = currentTopic.name || '';
         statusSelect.value = currentTopic.status || 'PLANNED';
         descriptionTextarea.value = currentTopic.description || '';
         tagsInput.value = currentTopic.tags || '';
 
-        // Definir URL de cancelamento
         cancelBtn.href = `/topics/${topicId}`;
+    }
+
+    function renderBlockOptions() {
+        blockSelect.innerHTML = '<option value="">Selecione um bloco...</option>';
+        blocks.forEach(block => {
+            const option = document.createElement('option');
+            option.value = block.id;
+            option.textContent = block.name;
+            blockSelect.appendChild(option);
+        });
+    }
+
+    function populateDisciplineOptions(blockId) {
+        const block = blocks.find(item => String(item.id) === String(blockId));
+        const disciplines = block?.disciplines || [];
+
+        disciplineSelect.innerHTML = '<option value="">Selecione uma disciplina...</option>';
+        disciplines.forEach(discipline => {
+            const option = document.createElement('option');
+            option.value = discipline.id;
+            option.textContent = discipline.name;
+            disciplineSelect.appendChild(option);
+        });
+
+        disciplineSelect.disabled = disciplines.length === 0;
+    }
+
+    function syncBlockSelection() {
+        if (currentTopic.block_id) {
+            blockSelect.value = currentTopic.block_id;
+            populateDisciplineOptions(currentTopic.block_id);
+        } else {
+            populateDisciplineOptions('');
+        }
+
+        if (currentTopic.discipline_id) {
+            disciplineSelect.value = currentTopic.discipline_id;
+            disciplineSelect.disabled = false;
+        }
+    }
+
+    function handleBlockChange() {
+        const selectedBlockId = blockSelect.value;
+        populateDisciplineOptions(selectedBlockId);
+        disciplineSelect.value = '';
+
+        if (selectedBlockId && disciplineSelect.disabled) {
+            showError('Este bloco ainda não possui disciplinas cadastradas. Cadastre uma disciplina antes de associar o tópico.');
+        }
+    }
+
+    function syncBlockFromDiscipline() {
+        const selectedDisciplineId = disciplineSelect.value;
+        if (!selectedDisciplineId) {
+            return;
+        }
+
+        const ownerBlock = blocks.find(block => (block.disciplines || []).some(discipline => String(discipline.id) === String(selectedDisciplineId)));
+        if (ownerBlock && String(blockSelect.value) !== String(ownerBlock.id)) {
+            blockSelect.value = ownerBlock.id;
+            populateDisciplineOptions(ownerBlock.id);
+            disciplineSelect.value = selectedDisciplineId;
+        }
     }
 
     function renderTopicInfo() {
         const createdAt = new Date(currentTopic.created_at).toLocaleDateString('pt-BR');
         const updatedAt = new Date(currentTopic.updated_at).toLocaleDateString('pt-BR');
+        const blockName = currentTopic.block?.name || '—';
+        const disciplineName = currentTopic.discipline?.name || '—';
         
         document.getElementById('topicInfo').innerHTML = `
+            <div class="mb-3">
+                <small class="text-muted">Bloco</small>
+                <div class="fw-bold">${blockName}</div>
+            </div>
+            <div class="mb-3">
+                <small class="text-muted">Disciplina</small>
+                <div class="fw-bold">${disciplineName}</div>
+            </div>
             <div class="mb-3">
                 <small class="text-muted">Criado em</small>
                 <div class="fw-bold">${createdAt}</div>
@@ -295,7 +367,8 @@ document.addEventListener('DOMContentLoaded', function() {
         return (
             nameInput.value !== (currentTopic.name || '') ||
             statusSelect.value !== (currentTopic.status || 'PLANNED') ||
-            blockSelect.value != currentTopic.block_id ||
+            String(blockSelect.value || '') !== String(currentTopic.block_id || '') ||
+            String(disciplineSelect.value || '') !== String(currentTopic.discipline_id || '') ||
             descriptionTextarea.value !== (currentTopic.description || '') ||
             tagsInput.value !== (currentTopic.tags || '')
         );
@@ -317,6 +390,9 @@ document.addEventListener('DOMContentLoaded', function() {
     function clearErrors() {
         document.querySelectorAll('.is-invalid').forEach(input => {
             input.classList.remove('is-invalid');
+        });
+        topicEditForm.querySelectorAll('.invalid-feedback').forEach(element => {
+            element.textContent = '';
         });
     }
 

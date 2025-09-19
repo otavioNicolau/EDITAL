@@ -246,7 +246,9 @@ document.addEventListener('DOMContentLoaded', function() {
         topics.forEach(topic => {
             const option = document.createElement('option');
             option.value = topic.id;
-            option.textContent = `${topic.block.name} • ${topic.name}`;
+            const blockLabel = topic.block?.name || 'Sem bloco';
+            const disciplineLabel = topic.discipline?.name ? ` • ${topic.discipline.name}` : '';
+            option.textContent = `${blockLabel}${disciplineLabel} • ${topic.name}`;
             topicFilter.appendChild(option);
         });
     }
@@ -261,8 +263,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const searchMatch = !searchTerm || 
                 item.title.toLowerCase().includes(searchTerm) ||
                 (item.notes && item.notes.toLowerCase().includes(searchTerm)) ||
-                item.topic.name.toLowerCase().includes(searchTerm) ||
-                item.topic.block.name.toLowerCase().includes(searchTerm);
+                (item.topic?.name || '').toLowerCase().includes(searchTerm) ||
+                (item.topic?.block?.name || '').toLowerCase().includes(searchTerm) ||
+                (item.topic?.discipline?.name || '').toLowerCase().includes(searchTerm);
             
             const topicMatch = !selectedTopic || item.topic_id == selectedTopic;
             const kindMatch = !selectedKind || item.kind === selectedKind;
@@ -284,38 +287,44 @@ document.addEventListener('DOMContentLoaded', function() {
 
         showItemsList();
         
-        itemsContainer.innerHTML = filteredItems.map(item => `
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <span class="badge ${getKindBadgeClass(item.kind)}">${getKindLabel(item.kind)}</span>
-                            <span class="badge ${getStatusBadgeClass(item.status)}">${getStatusLabel(item.status)}</span>
+        itemsContainer.innerHTML = filteredItems.map(item => {
+            const blockLabel = item.topic?.block?.name || 'Sem bloco';
+            const disciplineLabel = item.topic?.discipline?.name ? ` • ${item.topic.discipline.name}` : '';
+            const topicLabel = item.topic?.name || 'Sem tópico';
+
+            return `
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="badge ${getKindBadgeClass(item.kind)}">${getKindLabel(item.kind)}</span>
+                                <span class="badge ${getStatusBadgeClass(item.status)}">${getStatusLabel(item.status)}</span>
+                            </div>
+                            <h6 class="card-title">${item.title}</h6>
+                            <p class="card-text small text-muted mb-2">
+                                <i class="fas fa-folder me-1"></i>${blockLabel}${disciplineLabel} • ${topicLabel}
+                            </p>
+                            ${item.notes ? `<p class="card-text small">${truncateText(item.notes, 100)}</p>` : ''}
+                            ${item.url ? `<p class="card-text"><small><a href="${item.url}" target="_blank" class="text-decoration-none"><i class="fas fa-external-link-alt me-1"></i>Link</a></small></p>` : ''}
+                            ${item.due_at ? `<p class="card-text"><small class="text-muted"><i class="fas fa-clock me-1"></i>Vence: ${formatDate(item.due_at)}</small></p>` : ''}
                         </div>
-                        <h6 class="card-title">${item.title}</h6>
-                        <p class="card-text small text-muted mb-2">
-                            <i class="fas fa-folder me-1"></i>${item.topic.block.name} • ${item.topic.name}
-                        </p>
-                        ${item.notes ? `<p class="card-text small">${truncateText(item.notes, 100)}</p>` : ''}
-                        ${item.url ? `<p class="card-text"><small><a href="${item.url}" target="_blank" class="text-decoration-none"><i class="fas fa-external-link-alt me-1"></i>Link</a></small></p>` : ''}
-                        ${item.due_at ? `<p class="card-text"><small class="text-muted"><i class="fas fa-clock me-1"></i>Vence: ${formatDate(item.due_at)}</small></p>` : ''}
-                    </div>
-                    <div class="card-footer bg-transparent">
-                        <div class="d-flex gap-1">
-                            <button class="btn btn-sm btn-outline-primary flex-fill" onclick="viewItem('${item.id}')">
-                                <i class="fas fa-eye me-1"></i>Ver
-                            </button>
-                            <a href="/study-items/${item.id}/edit" class="btn btn-sm btn-outline-secondary">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <button class="btn btn-sm btn-outline-danger" onclick="showDeleteModal('${item.id}')">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                        <div class="card-footer bg-transparent">
+                            <div class="d-flex gap-1">
+                                <button class="btn btn-sm btn-outline-primary flex-fill" onclick="viewItem('${item.id}')">
+                                    <i class="fas fa-eye me-1"></i>Ver
+                                </button>
+                                <a href="/study-items/${item.id}/edit" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button class="btn btn-sm btn-outline-danger" onclick="showDeleteModal('${item.id}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
     function updateStats() {
@@ -330,11 +339,15 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!item) return;
 
         currentViewingItem = item;
-        
+
+        const blockLabel = item.topic?.block?.name || 'Sem bloco';
+        const disciplineLabel = item.topic?.discipline?.name ? ` • ${item.topic.discipline.name}` : '';
+        const topicLabel = item.topic?.name || 'Sem tópico';
+
         document.getElementById('viewModalTitle').innerHTML = `
             ${getKindIcon(item.kind)} ${item.title}
         `;
-        
+
         document.getElementById('viewModalBody').innerHTML = `
             <div class="row">
                 <div class="col-md-8">
@@ -360,7 +373,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="col-md-4">
                     <div class="mb-3">
                         <h6>Informações:</h6>
-                        <p><strong>Tópico:</strong><br>${item.topic.block.name} • ${item.topic.name}</p>
+                        <p><strong>Tópico:</strong><br>${blockLabel}${disciplineLabel} • ${topicLabel}</p>
                         <p><strong>Tipo:</strong><br>${getKindLabel(item.kind)}</p>
                         <p><strong>Status:</strong><br>${getStatusLabel(item.status)}</p>
                         <p><strong>Criado:</strong><br>${formatDate(item.created_at)}</p>

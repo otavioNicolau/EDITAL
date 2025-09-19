@@ -362,9 +362,12 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Tópico
         if (studyItem.topic) {
+            const blockLabel = studyItem.topic.block?.name || 'Sem bloco';
+            const disciplineLabel = studyItem.topic.discipline?.name ? ` • ${studyItem.topic.discipline.name}` : '';
+            const topicLabel = studyItem.topic.name || 'Sem tópico';
             document.getElementById('topicPath').innerHTML = `
                 <a href="/topics/${studyItem.topic.id}" class="text-decoration-none">
-                    ${studyItem.topic.block.name} • ${studyItem.topic.name}
+                    ${blockLabel}${disciplineLabel} • ${topicLabel}
                 </a>
             `;
         }

@@ -199,8 +199,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         filteredTopics = topics.filter(topic => {
             const matchesSearch = topic.name.toLowerCase().includes(searchTerm);
-            const matchesBlock = !selectedBlock || topic.block_id === selectedBlock;
-            const matchesDiscipline = !selectedDiscipline || topic.discipline_id == selectedDiscipline;
+            const matchesBlock = !selectedBlock || String(topic.block_id) === String(selectedBlock);
+            const matchesDiscipline = !selectedDiscipline || String(topic.discipline_id) === String(selectedDiscipline);
             const matchesStatus = !selectedStatus || topic.status === selectedStatus;
             
             return matchesSearch && matchesBlock && matchesDiscipline && matchesStatus;
@@ -256,7 +256,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         ${topic.description ? `<p class="card-text text-muted small">${topic.description}</p>` : ''}
                         
                         <div class="mb-3">
-                            <span class="badge bg-light text-dark">${topic.block?.name || 'Sem bloco'}</span>
+                            ${topic.block ? `<span class="badge bg-light text-dark"><i class="fas fa-cube me-1"></i>${topic.block.name}</span>` : ''}
+                            ${topic.discipline ? `<span class="badge bg-light text-dark"><i class="fas fa-book-open me-1"></i>${topic.discipline.name}</span>` : ''}
                             <span class="badge ${getStatusBadgeClass(topic.status)}">${getStatusLabel(topic.status)}</span>
                         </div>
                         

@@ -142,7 +142,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb">
                             <li class="breadcrumb-item"><a href="/topics">Tópicos</a></li>
-                            <li class="breadcrumb-item"><a href="/blocks/${currentTopic.block.id}">${currentTopic.block.name}</a></li>
+                            ${currentTopic.block ? `<li class="breadcrumb-item"><a href="/blocks/${currentTopic.block.id}">${currentTopic.block.name}</a></li>` : ''}
+                            ${currentTopic.discipline ? `<li class="breadcrumb-item"><a href="/disciplines/${currentTopic.discipline.id}">${currentTopic.discipline.name}</a></li>` : ''}
                             <li class="breadcrumb-item active">${currentTopic.name}</li>
                         </ol>
                     </nav>
@@ -151,6 +152,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         <span class="badge ${getStatusBadgeClass(currentTopic.status)} fs-6">${getStatusLabel(currentTopic.status)}</span>
                     </div>
                     ${currentTopic.description ? `<p class="text-muted mb-0">${currentTopic.description}</p>` : ''}
+                    <div class="d-flex flex-wrap gap-3 text-muted small mt-2">
+                        ${currentTopic.block ? `<span><i class="fas fa-cube me-1"></i>${currentTopic.block.name}</span>` : ''}
+                        ${currentTopic.discipline ? `<span><i class="fas fa-book-open me-1"></i>${currentTopic.discipline.name}</span>` : ''}
+                    </div>
                     ${currentTopic.tags ? `<div class="mt-2">${renderTags(currentTopic.tags)}</div>` : ''}
                 </div>
                 <div class="col-auto">

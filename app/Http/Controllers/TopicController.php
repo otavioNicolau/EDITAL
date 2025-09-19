@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Topic;
 use App\Models\Block;
+use App\Models\Discipline;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
@@ -18,7 +19,7 @@ class TopicController extends Controller
     {
         // Se for uma requisição da API (prefixo /api/), retorna JSON
         if ($request->is('api/*')) {
-            $query = Topic::with(['block:id,name'])
+            $query = Topic::with(['block:id,name', 'discipline:id,name,block_id'])
                          ->withCount(['studyItems', 'reviews']);
 
             // Filter by block if provided
@@ -43,7 +44,7 @@ class TopicController extends Controller
 
         // Se for uma requisição AJAX explícita (com X-Requested-With), retorna JSON
         if ($request->ajax()) {
-            $query = Topic::with(['block:id,name'])
+            $query = Topic::with(['block:id,name', 'discipline:id,name,block_id'])
                          ->withCount(['studyItems', 'reviews']);
 
             // Filter by block if provided
@@ -79,13 +80,32 @@ class TopicController extends Controller
             $validated = $request->validate([
                 'name' => 'required|string|min:1',
                 'description' => 'nullable|string',
-                'block_id' => 'required|exists:blocks,id',
+                'discipline_id' => 'required|exists:disciplines,id',
                 'status' => ['nullable', Rule::in(['PLANNED', 'STUDYING', 'REVIEW', 'COMPLETED'])],
                 'tags' => 'nullable|string',
             ]);
 
-            $topic = Topic::create($validated);
-            $topic->load('block:id,name');
+            $discipline = Discipline::find($validated['discipline_id']);
+
+            if ($request->filled('block_id') && (int) $request->block_id !== $discipline->block_id) {
+                return response()->json([
+                    'error' => 'Dados inválidos',
+                    'details' => [
+                        'block_id' => ['O bloco selecionado não corresponde à disciplina escolhida.'],
+                    ],
+                ], 422);
+            }
+
+            $topic = Topic::create([
+                'name' => $validated['name'],
+                'description' => $validated['description'] ?? null,
+                'status' => $validated['status'] ?? 'PLANNED',
+                'tags' => $validated['tags'] ?? null,
+                'discipline_id' => $discipline->id,
+                'block_id' => $discipline->block_id,
+            ]);
+
+            $topic->load(['block:id,name', 'discipline:id,name,block_id']);
             
             return response()->json($topic, 201);
         } catch (ValidationException $e) {
@@ -105,6 +125,7 @@ class TopicController extends Controller
         if ($request->is('api/*')) {
             $topic->load([
                 'block:id,name',
+                'discipline:id,name,block_id',
                 'studyItems' => function ($query) {
                     $query->withCount('reviews');
                 }
@@ -112,11 +133,12 @@ class TopicController extends Controller
 
             return response()->json($topic);
         }
-        
+
         // Se for uma requisição AJAX explícita (com X-Requested-With), retorna JSON
         if ($request->ajax()) {
             $topic->load([
                 'block:id,name',
+                'discipline:id,name,block_id',
                 'studyItems' => function ($query) {
                     $query->withCount('reviews');
                 }
@@ -138,13 +160,28 @@ class TopicController extends Controller
             $validated = $request->validate([
                 'name' => 'sometimes|required|string|min:1',
                 'description' => 'nullable|string',
-                'block_id' => 'sometimes|required|exists:blocks,id',
+                'discipline_id' => 'sometimes|required|exists:disciplines,id',
                 'status' => ['nullable', Rule::in(['PLANNED', 'STUDYING', 'REVIEW', 'COMPLETED'])],
                 'tags' => 'nullable|string',
             ]);
 
+            if (array_key_exists('discipline_id', $validated)) {
+                $discipline = Discipline::find($validated['discipline_id']);
+
+                if ($request->filled('block_id') && (int) $request->block_id !== $discipline->block_id) {
+                    return response()->json([
+                        'error' => 'Dados inválidos',
+                        'details' => [
+                            'block_id' => ['O bloco selecionado não corresponde à disciplina escolhida.'],
+                        ],
+                    ], 422);
+                }
+
+                $validated['block_id'] = $discipline->block_id;
+            }
+
             $topic->update($validated);
-            $topic->load('block:id,name');
+            $topic->load(['block:id,name', 'discipline:id,name,block_id']);
             
             return response()->json($topic);
         } catch (ValidationException $e) {

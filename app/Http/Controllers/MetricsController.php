@@ -176,10 +176,10 @@ class MetricsController extends Controller
 
         $easeDistribution = StudyItem::selectRaw('
                 CASE 
-                    WHEN ease < 1.8 THEN "Muito Difícil"
-                    WHEN ease < 2.2 THEN "Difícil"
-                    WHEN ease < 2.6 THEN "Médio"
-                    WHEN ease < 3.0 THEN "Fácil"
+                    WHEN COALESCE(ease, 2.5) < 1.8 THEN "Muito Difícil"
+                    WHEN COALESCE(ease, 2.5) < 2.2 THEN "Difícil"
+                    WHEN COALESCE(ease, 2.5) < 2.6 THEN "Médio"
+                    WHEN COALESCE(ease, 2.5) < 3.0 THEN "Fácil"
                     ELSE "Muito Fácil"
                 END as difficulty_level,
                 COUNT(*) as count

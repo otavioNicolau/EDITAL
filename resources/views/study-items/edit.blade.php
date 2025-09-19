@@ -325,7 +325,9 @@ document.addEventListener('DOMContentLoaded', function() {
         topics.forEach(topic => {
             const option = document.createElement('option');
             option.value = topic.id;
-            option.textContent = `${topic.block.name} • ${topic.name}`;
+            const blockLabel = topic.block?.name || 'Sem bloco';
+            const disciplineLabel = topic.discipline?.name ? ` • ${topic.discipline.name}` : '';
+            option.textContent = `${blockLabel}${disciplineLabel} • ${topic.name}`;
             topicSelect.appendChild(option);
         });
     }
@@ -402,7 +404,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <h6 class="card-title">${title}</h6>
             ${selectedTopic ? `
                 <p class="card-text small text-muted mb-2">
-                    <i class="fas fa-folder me-1"></i>${selectedTopic.block?.name || selectedTopic.block_name} • ${selectedTopic.name}
+                    <i class="fas fa-folder me-1"></i>${selectedTopic.block?.name || selectedTopic.block_name || 'Sem bloco'}${selectedTopic.discipline?.name ? ' • ' + selectedTopic.discipline.name : ''} • ${selectedTopic.name}
                 </p>
             ` : ''}
             ${notes ? `<p class="card-text small">${truncateText(notes, 100)}</p>` : ''}
