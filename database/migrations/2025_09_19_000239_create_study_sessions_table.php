@@ -13,10 +13,12 @@ return new class extends Migration
     {
         Schema::create('study_sessions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('topic_id')->constrained()->onDelete('cascade');
+            $table->foreignId('topic_id')->nullable()->constrained()->nullOnDelete();
             $table->timestamp('started_at');
             $table->timestamp('ended_at')->nullable();
-            $table->integer('minutes');
+            $table->integer('duration_minutes')->default(0);
+            $table->integer('items_reviewed')->default(0);
+            $table->json('metadata')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
         });

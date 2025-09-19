@@ -70,7 +70,7 @@ class TopicController extends Controller
                 'name' => 'required|string|min:1',
                 'description' => 'nullable|string',
                 'block_id' => 'required|exists:blocks,id',
-                'status' => ['nullable', Rule::in(['PLANNED', 'STUDYING', 'COMPLETED'])],
+                'status' => ['nullable', Rule::in(['PLANNED', 'STUDYING', 'REVIEW', 'COMPLETED'])],
                 'tags' => 'nullable|string',
             ]);
 
@@ -129,7 +129,7 @@ class TopicController extends Controller
                 'name' => 'sometimes|required|string|min:1',
                 'description' => 'nullable|string',
                 'block_id' => 'sometimes|required|exists:blocks,id',
-                'status' => ['nullable', Rule::in(['PLANNED', 'STUDYING', 'COMPLETED'])],
+                'status' => ['nullable', Rule::in(['PLANNED', 'STUDYING', 'REVIEW', 'COMPLETED'])],
                 'tags' => 'nullable|string',
             ]);
 
@@ -180,7 +180,7 @@ class TopicController extends Controller
     {
         try {
             $validated = $request->validate([
-                'status' => ['required', Rule::in(['PLANNED', 'STUDYING', 'COMPLETED'])],
+                'status' => ['required', Rule::in(['PLANNED', 'STUDYING', 'REVIEW', 'COMPLETED'])],
             ]);
 
             $topic->update(['status' => $validated['status']]);

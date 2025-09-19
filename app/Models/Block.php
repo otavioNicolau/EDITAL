@@ -24,6 +24,10 @@ class Block extends Model
         'order' => 'integer',
     ];
 
+    protected $appends = [
+        'progress_percentage',
+    ];
+
     public function disciplines(): HasMany
     {
         return $this->hasMany(Discipline::class);

@@ -159,8 +159,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             const response = await fetch('/api/blocks');
             const data = await response.json();
-            // O BlockController retorna { data: blocks, total: count }
-            blocks = data.data || [];
+            blocks = Array.isArray(data) ? data : (data.data || []);
             renderBlockFilter();
         } catch (error) {
             console.error('Erro ao carregar blocos:', error);
@@ -171,7 +170,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             const response = await fetch('/api/disciplines');
             const data = await response.json();
-            disciplines = data.data || [];
+            disciplines = Array.isArray(data) ? data : (data.data || []);
             renderDisciplineFilter();
         } catch (error) {
             console.error('Erro ao carregar disciplinas:', error);

@@ -16,15 +16,24 @@ class DisciplineController extends Controller
     {
         // Se for uma requisição AJAX ou API, retorna JSON
         if ($request->wantsJson() || $request->is('api/*')) {
-            $query = Discipline::with('block')->withCount(['topics']);
+            $query = Discipline::with('block')
+                ->withCount([
+                    'topics',
+                    'topics as completed_topics_count' => fn ($query) => $query->where('status', 'COMPLETED'),
+                    'studyItems',
+                    'reviews',
+                ]);
             
             // Filtros
-            if ($request->has('search') && $request->search) {
-                $query->where('name', 'like', '%' . $request->search . '%')
-                      ->orWhere('description', 'like', '%' . $request->search . '%');
+            if ($request->filled('search')) {
+                $search = $request->string('search')->toString();
+                $query->where(function ($innerQuery) use ($search) {
+                    $innerQuery->where('name', 'like', "%{$search}%")
+                               ->orWhere('description', 'like', "%{$search}%");
+                });
             }
-            
-            if ($request->has('block_id') && $request->block_id) {
+
+            if ($request->filled('block_id')) {
                 $query->where('block_id', $request->block_id);
             }
             

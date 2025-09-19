@@ -15,11 +15,15 @@ return new class extends Migration
             $table->id();
             $table->foreignId('topic_id')->constrained()->onDelete('cascade');
             $table->string('title');
-            $table->enum('kind', ['SUMMARY', 'QUESTION', 'LAW', 'VIDEO', 'OTHER']);
+            $table->enum('kind', ['QUESTION', 'CONCEPT', 'EXERCISE', 'VIDEO', 'ARTICLE']);
             $table->string('url')->nullable();
             $table->text('notes')->nullable();
             $table->string('tags')->nullable();
-            $table->enum('status', ['TO_STUDY', 'PENDING', 'COMPLETED', 'REVIEWING'])->default('TO_STUDY');
+            $table->enum('status', ['NEW', 'LEARNING', 'REVIEW', 'MASTERED'])->default('NEW');
+            $table->json('metadata')->nullable();
+            $table->decimal('ease', 3, 2)->default(2.50);
+            $table->integer('interval')->default(0);
+            $table->timestamp('due_at')->nullable();
             $table->timestamps();
         });
     }

@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
             showLoading();
             const response = await fetch('/api/disciplines');
             const data = await response.json();
-            disciplines = data.data || [];
+            disciplines = Array.isArray(data) ? data : (data.data || []);
             filteredDisciplines = [...disciplines];
             renderDisciplines();
         } catch (error) {
@@ -142,7 +142,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             const response = await fetch('/api/blocks');
             const data = await response.json();
-            blocks = data.data || [];
+            blocks = Array.isArray(data) ? data : (data.data || []);
             renderBlockFilter();
         } catch (error) {
             console.error('Erro ao carregar blocos:', error);

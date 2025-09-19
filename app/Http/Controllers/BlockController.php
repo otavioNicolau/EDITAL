@@ -14,67 +14,36 @@ class BlockController extends Controller
      */
     public function index(Request $request)
     {
-        // Se for uma requisição da API (prefixo /api/), retorna JSON
-        if ($request->is('api/*')) {
-            $query = Block::withCount(['topics', 'studyItems']);
-            
-            // Filtros
-            if ($request->has('search') && $request->search) {
-                $query->where('name', 'like', '%' . $request->search . '%')
-                      ->orWhere('description', 'like', '%' . $request->search . '%');
-            }
-            
-            if ($request->has('status') && $request->status) {
-                $query->where('status', $request->status);
-            }
-            
-            // Ordenação
-            $sortBy = $request->get('sort', 'name');
-            $sortOrder = $request->get('order', 'asc');
-            
-            if (in_array($sortBy, ['name', 'created_at', 'updated_at'])) {
-                $query->orderBy($sortBy, $sortOrder);
-            }
-            
-            $blocks = $query->get();
-            
-            return response()->json([
-                'data' => $blocks,
-                'total' => $blocks->count()
-            ]);
+        $blocksQuery = Block::withCount(['topics', 'studyItems', 'disciplines'])
+            ->with(['disciplines' => function ($query) {
+                $query->select('id', 'name', 'block_id', 'order')->orderBy('order');
+            }]);
+
+        if ($request->filled('search')) {
+            $search = $request->string('search')->toString();
+            $blocksQuery->where(function ($query) use ($search) {
+                $query->where('name', 'like', "%{$search}%")
+                      ->orWhere('description', 'like', "%{$search}%");
+            });
         }
-        
-        // Se for uma requisição AJAX explícita (com X-Requested-With), retorna JSON
-        if ($request->ajax()) {
-            $query = Block::withCount(['topics', 'studyItems']);
-            
-            // Filtros
-            if ($request->has('search') && $request->search) {
-                $query->where('name', 'like', '%' . $request->search . '%')
-                      ->orWhere('description', 'like', '%' . $request->search . '%');
-            }
-            
-            if ($request->has('status') && $request->status) {
-                $query->where('status', $request->status);
-            }
-            
-            // Ordenação
-            $sortBy = $request->get('sort', 'name');
-            $sortOrder = $request->get('order', 'asc');
-            
-            if (in_array($sortBy, ['name', 'created_at', 'updated_at'])) {
-                $query->orderBy($sortBy, $sortOrder);
-            }
-            
-            $blocks = $query->get();
-            
-            return response()->json([
-                'data' => $blocks,
-                'total' => $blocks->count()
-            ]);
+
+        if ($request->filled('status')) {
+            $blocksQuery->where('status', $request->status);
         }
-        
-        // Para todas as outras requisições web, retorna a view
+
+        $sortBy = $request->get('sort', 'name');
+        $sortOrder = $request->get('order', 'asc');
+
+        if (in_array($sortBy, ['name', 'created_at', 'updated_at'])) {
+            $blocksQuery->orderBy($sortBy, $sortOrder);
+        }
+
+        $blocks = $blocksQuery->get();
+
+        if ($request->is('api/*') || $request->ajax()) {
+            return response()->json($blocks);
+        }
+
         return view('blocks.index');
     }
 

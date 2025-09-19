@@ -19,6 +19,7 @@ class StudyItem extends Model
         'topic_id',
         'status',
         'url',
+        'tags',
         'metadata',
         'ease',
         'interval',
@@ -30,6 +31,7 @@ class StudyItem extends Model
         'ease' => 'decimal:2',
         'interval' => 'integer',
         'due_at' => 'datetime',
+        'metadata' => 'array',
     ];
 
     public function topic(): BelongsTo
@@ -49,25 +51,31 @@ class StudyItem extends Model
 
     public function applyReview(int $grade): array
     {
-        $ease = $this->ease;
-        $interval = $this->interval;
-        
+        $ease = $this->ease ?? 2.5;
+        $interval = $this->interval ?? 0;
+
         // Algoritmo SRS baseado no original
         $newEase = max(1.3, $ease + (-0.8 + 0.28 * $grade - 0.02 * $grade * $grade));
-        
+
         if ($grade < 2) {
             $newInterval = 1;
+        } elseif ($interval === 0) {
+            $newInterval = 1;
         } else {
-            $newInterval = $interval === 0 ? 1 : round($interval * $newEase);
+            $newInterval = (int) round($interval * $newEase);
         }
-        
+
         $dueAt = Carbon::now()->addDays($newInterval);
-        
-        return [
+
+        $updates = [
             'ease' => $newEase,
             'interval' => $newInterval,
             'due_at' => $dueAt,
         ];
+
+        $this->forceFill($updates)->save();
+
+        return $updates;
     }
 
     public function scopeDue($query)

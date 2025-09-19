@@ -112,9 +112,11 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 loading.classList.add('hidden');
-                
-                if (data.data && data.data.length > 0) {
-                    renderBlocks(data.data);
+
+                const blocks = Array.isArray(data) ? data : (data.data || []);
+
+                if (blocks.length > 0) {
+                    renderBlocks(blocks);
                 } else {
                     emptyState.classList.remove('hidden');
                 }
@@ -136,22 +138,23 @@ document.addEventListener('DOMContentLoaded', function() {
                             ${getStatusText(block.status)}
                         </span>
                     </div>
-                    
                     ${block.description ? `<p class="text-sm text-gray-600 mb-4 line-clamp-2">${block.description}</p>` : ''}
-                    
+
                     <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
-                        <span><i class="fas fa-list mr-1"></i>${block.topics_count || 0} tópicos</span>
+                        <span><i class="fas fa-book mr-1"></i>${block.disciplines_count || 0} matérias</span>
                         <span><i class="fas fa-calendar mr-1"></i>${formatDate(block.created_at)}</span>
                     </div>
-                    
-                    ${block.progress !== undefined ? `
-                        <div class="mb-4">
+
+                    ${renderDisciplinesPreview(block.disciplines)}
+
+                    ${typeof block.progress_percentage !== 'undefined' ? `
+                        <div class="mt-4">
                             <div class="flex justify-between text-sm text-gray-600 mb-1">
-                                <span>Progresso</span>
-                                <span>${Math.round(block.progress)}%</span>
+                                <span>Progresso dos tópicos</span>
+                                <span>${Math.round(block.progress_percentage)}%</span>
                             </div>
                             <div class="w-full bg-gray-200 rounded-full h-2">
-                                <div class="bg-blue-600 h-2 rounded-full" style="width: ${block.progress}%"></div>
+                                <div class="bg-blue-600 h-2 rounded-full" style="width: ${block.progress_percentage}%"></div>
                             </div>
                         </div>
                     ` : ''}
@@ -175,6 +178,28 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             </div>
         `).join('');
+    }
+
+    function renderDisciplinesPreview(disciplines = []) {
+        if (!disciplines || disciplines.length === 0) {
+            return '<p class="text-sm text-gray-500">Nenhuma matéria cadastrada ainda.</p>';
+        }
+
+        const preview = disciplines.slice(0, 3)
+            .map(discipline => `<li class="text-sm text-gray-600">${discipline.name}</li>`)
+            .join('');
+
+        const remaining = disciplines.length - 3;
+
+        return `
+            <div>
+                <p class="text-sm font-medium text-gray-700 mb-2">Matérias vinculadas</p>
+                <ul class="space-y-1">
+                    ${preview}
+                </ul>
+                ${remaining > 0 ? `<p class="text-xs text-gray-500 mt-2">+ ${remaining} matéria(s) adicionais</p>` : ''}
+            </div>
+        `;
     }
 
     function getStatusBadgeClass(status) {

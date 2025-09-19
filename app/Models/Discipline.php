@@ -39,6 +39,11 @@ class Discipline extends Model
         return $this->hasManyThrough(StudyItem::class, Topic::class);
     }
 
+    public function reviews(): HasManyThrough
+    {
+        return $this->hasManyThrough(Review::class, StudyItem::class, 'topic_id', 'study_item_id');
+    }
+
     public function getTopicsCountAttribute()
     {
         return $this->topics()->count();
@@ -46,7 +51,7 @@ class Discipline extends Model
 
     public function getCompletedTopicsCountAttribute()
     {
-        return $this->topics()->where('status', 'MATURE')->count();
+        return $this->topics()->where('status', 'COMPLETED')->count();
     }
 
     public function getProgressPercentageAttribute()

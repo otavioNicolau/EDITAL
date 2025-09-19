@@ -190,24 +190,26 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!response.ok) throw new Error('Erro ao carregar dados');
             
             const data = await response.json();
-            const disciplines = data.data || [];
+            const disciplines = Array.isArray(data) ? data : (data.data || []);
             
             // Update stats based on disciplines
             let totalTopics = 0;
+            let completedTopics = 0;
             let totalItems = 0;
             let totalReviews = 0;
-            
+
             disciplines.forEach(discipline => {
                 totalTopics += discipline.topics_count || 0;
+                completedTopics += discipline.completed_topics_count || 0;
                 totalItems += discipline.study_items_count || 0;
                 totalReviews += discipline.reviews_count || 0;
             });
-            
+
             document.getElementById('total-disciplines').textContent = disciplines.length;
             document.getElementById('total-items').textContent = totalItems;
             document.getElementById('total-reviews').textContent = totalReviews;
-            
-            const progress = disciplines.length > 0 ? Math.round((disciplines.filter(d => d.status === 'completed').length / disciplines.length) * 100) : 0;
+
+            const progress = totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
             document.getElementById('progress-percent').textContent = progress + '%';
             
             // Load disciplines

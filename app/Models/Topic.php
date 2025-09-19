@@ -26,6 +26,10 @@ class Topic extends Model
         'discipline_id' => 'integer',
     ];
 
+    protected $appends = [
+        'progress_percentage',
+    ];
+
     public function block(): BelongsTo
     {
         return $this->belongsTo(Block::class);
@@ -53,7 +57,7 @@ class Topic extends Model
 
     public function getCompletedStudyItemsCountAttribute()
     {
-        return $this->studyItems()->where('status', 'COMPLETED')->count();
+        return $this->studyItems()->where('status', 'MASTERED')->count();
     }
 
     public function getProgressPercentageAttribute()

@@ -103,9 +103,13 @@ class StudyItemController extends Controller
                 'due_at' => 'nullable|date',
             ]);
 
+            if (isset($validated['metadata']) && is_string($validated['metadata'])) {
+                $validated['metadata'] = json_decode($validated['metadata'], true) ?: null;
+            }
+
             $studyItem = StudyItem::create($validated);
             $studyItem->load(['topic:id,name,block_id', 'topic.block:id,name']);
-            
+
             return response()->json($studyItem, 201);
         } catch (ValidationException $e) {
             return response()->json([
@@ -150,9 +154,13 @@ class StudyItemController extends Controller
                 'due_at' => 'nullable|date',
             ]);
 
+            if (isset($validated['metadata']) && is_string($validated['metadata'])) {
+                $validated['metadata'] = json_decode($validated['metadata'], true) ?: null;
+            }
+
             $studyItem->update($validated);
             $studyItem->load(['topic:id,name,block_id', 'topic.block:id,name']);
-            
+
             return response()->json($studyItem);
         } catch (ValidationException $e) {
             return response()->json([

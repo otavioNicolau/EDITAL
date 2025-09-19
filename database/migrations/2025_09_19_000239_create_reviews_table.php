@@ -15,11 +15,11 @@ return new class extends Migration
             $table->id();
             $table->foreignId('study_item_id')->constrained()->onDelete('cascade');
             $table->integer('grade');
-            $table->decimal('ease_before', 3, 2);
+            $table->decimal('ease_before', 3, 2)->nullable();
             $table->decimal('ease_after', 3, 2);
-            $table->integer('interval_before');
+            $table->integer('interval_before')->default(0);
             $table->integer('interval_after');
-            $table->timestamp('due_before');
+            $table->timestamp('due_before')->nullable();
             $table->timestamp('due_after');
             $table->timestamps();
         });

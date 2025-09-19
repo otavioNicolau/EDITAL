@@ -62,18 +62,24 @@ class MetricsController extends Controller
      */
     private function getProgressMetrics(): array
     {
-        $blocks = Block::withCount(['topics' => function ($query) {
-            $query->where('status', 'COMPLETED');
-        }])->withCount('topics')->get();
+        $blocks = Block::withCount([
+            'topics',
+            'topics as completed_topics_count' => fn ($query) => $query->where('status', 'COMPLETED'),
+            'disciplines',
+        ])->get();
 
         $blockProgress = $blocks->map(function ($block) {
+            $totalTopics = $block->topics_count;
+            $completedTopics = $block->completed_topics_count;
+
             return [
                 'id' => $block->id,
                 'name' => $block->name,
-                'total_topics' => $block->topics_count,
-                'completed_topics' => $block->topics_count > 0 ? $block->topics_count : 0,
-                'progress_percentage' => $block->topics_count > 0 
-                    ? round(($block->topics_count / $block->topics_count) * 100, 1) 
+                'total_topics' => $totalTopics,
+                'completed_topics' => $completedTopics,
+                'disciplines_count' => $block->disciplines_count,
+                'progress_percentage' => $totalTopics > 0
+                    ? round(($completedTopics / $totalTopics) * 100, 1)
                     : 0,
             ];
         });
@@ -149,27 +155,43 @@ class MetricsController extends Controller
     {
         $itemsByKind = StudyItem::selectRaw('kind, COUNT(*) as count')
                                ->groupBy('kind')
+                               ->orderByDesc('count')
                                ->get();
 
         $topicDifficulty = Topic::withCount(['studyItems', 'reviews'])
+                               ->with(['studyItems:id,topic_id,ease'])
                                ->get()
                                ->map(function ($topic) {
+                                   $averageEase = $topic->studyItems->avg('ease') ?? 0;
+
                                    return [
                                        'id' => $topic->id,
                                        'name' => $topic->name,
                                        'study_items_count' => $topic->study_items_count,
                                        'reviews_count' => $topic->reviews_count,
-                                       'average_ease' => 2.5, // Default value since ease column doesn't exist
-                                       'difficulty_level' => 'Medium', // Default difficulty level
+                                       'average_ease' => round($averageEase, 2),
+                                       'difficulty_level' => $this->getDifficultyLevel($averageEase ?: 2.5),
                                    ];
                                });
+
+        $easeDistribution = StudyItem::selectRaw('
+                CASE 
+                    WHEN ease < 1.8 THEN "Muito Difícil"
+                    WHEN ease < 2.2 THEN "Difícil"
+                    WHEN ease < 2.6 THEN "Médio"
+                    WHEN ease < 3.0 THEN "Fácil"
+                    ELSE "Muito Fácil"
+                END as difficulty_level,
+                COUNT(*) as count
+            ')
+            ->groupBy('difficulty_level')
+            ->orderBy('count', 'desc')
+            ->get();
 
         return [
             'items_by_kind' => $itemsByKind,
             'topic_difficulty' => $topicDifficulty,
-            'ease_distribution' => collect([
-                ['difficulty_level' => 'Medium', 'count' => StudyItem::count()]
-            ]), // Simplified since ease column doesn't exist
+            'ease_distribution' => $easeDistribution,
         ];
     }
 

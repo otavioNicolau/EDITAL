@@ -11,14 +11,17 @@ class StudySession extends Model
     use HasFactory;
 
     protected $fillable = [
+        'topic_id',
         'started_at',
         'ended_at',
         'duration_minutes',
         'items_reviewed',
         'metadata',
+        'notes',
     ];
 
     protected $casts = [
+        'topic_id' => 'integer',
         'started_at' => 'datetime',
         'ended_at' => 'datetime',
         'duration_minutes' => 'integer',
