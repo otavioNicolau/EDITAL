@@ -1,191 +1,61 @@
-# 📚 Gerenciador de Estudos para Concurso
+<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
-Um sistema completo para organizar estudos de concurso público com blocos temáticos, sistema de revisão espaçada (SRS), timer Pomodoro e métricas de progresso.
+<p align="center">
+<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+</p>
 
-## 🚀 Funcionalidades
+## About Laravel
 
-- **Dashboard com Métricas**: Progresso geral, horas estudadas, revisões pendentes
-- **Gestão de Blocos e Tópicos**: CRUD completo com filtros e busca
-- **Itens de Estudo**: Resumos, questões, leis e vídeos organizados
-- **Sistema Pomodoro**: Timer para sessões de estudo focado
-- **Revisão SRS**: Sistema de repetição espaçada para fixação
-- **Métricas Avançadas**: Acompanhamento detalhado do progresso
+Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
 
-## 🛠️ Stack Tecnológica
+- [Simple, fast routing engine](https://laravel.com/docs/routing).
+- [Powerful dependency injection container](https://laravel.com/docs/container).
+- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
+- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
+- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
+- [Robust background job processing](https://laravel.com/docs/queues).
+- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
 
-- **Frontend**: Next.js 15 (App Router), React 19, TypeScript
-- **Styling**: Tailwind CSS 4, Shadcn/UI
-- **Backend**: Next.js API Routes
-- **Banco de Dados**: Prisma + SQLite
-- **Validação**: Zod
-- **Deploy**: Netlify
+Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
-## 📦 Instalação
+## Learning Laravel
 
-1. Clone o repositório:
-```bash
-git clone <repository-url>
-cd estudo-concurso
-```
+Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
 
-2. Instale as dependências:
-```bash
-npm install
-```
+You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
 
-3. Configure o banco de dados:
-```bash
-npm run db:generate
-npm run db:migrate
-```
+If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
 
-4. Popule com dados iniciais (opcional):
-```bash
-npm run db:seed
-```
+## Laravel Sponsors
 
-5. Execute em desenvolvimento:
-```bash
-npm run dev
-```
+We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
 
-## 🗃️ Estrutura do Banco
+### Premium Partners
 
-### Modelos Principais
+- **[Vehikl](https://vehikl.com)**
+- **[Tighten Co.](https://tighten.co)**
+- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
+- **[64 Robots](https://64robots.com)**
+- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
+- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
+- **[Redberry](https://redberry.international/laravel-development)**
+- **[Active Logic](https://activelogic.com)**
 
-- **Block**: Blocos temáticos (ex: Direito Constitucional)
-- **Topic**: Tópicos dentro dos blocos (ex: Princípios Fundamentais)
-- **StudyItem**: Itens de estudo (resumos, questões, leis, vídeos)
-- **StudySession**: Sessões de estudo com timer
-- **Review**: Revisões do sistema SRS
+## Contributing
 
-### Enums
+Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
 
-- **ItemKind**: SUMMARY, QUESTION, LAW, VIDEO
-- **ItemStatus**: PENDING, COMPLETED, REVIEWING
-- **TopicStatus**: PLANNED, STUDYING, COMPLETED
+## Code of Conduct
 
-## 🌐 Deploy no Netlify
+In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
 
-### Configuração Automática
+## Security Vulnerabilities
 
-O projeto já está configurado para deploy no Netlify com:
+If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
 
-- `netlify.toml` com configurações otimizadas
-- Plugin oficial do Next.js (`@netlify/plugin-nextjs`)
-- Redirecionamentos para SPA e API routes
-- Headers de segurança
-- Cache otimizado para assets estáticos
+## License
 
-### Passos para Deploy
-
-1. **Conecte seu repositório ao Netlify**:
-   - Acesse [netlify.com](https://netlify.com)
-   - Clique em "New site from Git"
-   - Conecte seu repositório GitHub/GitLab
-
-2. **Configurações de Build** (já configuradas no `netlify.toml`):
-   - Build command: `prisma generate && npm run build`
-   - Publish directory: `.next`
-   - Node version: 18
-
-3. **Variáveis de Ambiente**:
-   ```
-   DATABASE_URL=file:./dev.db
-   NODE_ENV=production
-   ```
-
-4. **Deploy**:
-   - O deploy será automático a cada push na branch principal
-   - Primeira build pode demorar alguns minutos
-
-### Troubleshooting
-
-- **Erro de build**: Verifique se todas as dependências estão no `package.json`
-- **Erro de Prisma**: Certifique-se que `prisma generate` está no build command
-- **Erro 404**: Verifique os redirecionamentos no `netlify.toml`
-
-## 📱 Páginas Principais
-
-- `/` - Dashboard com métricas e ações rápidas
-- `/blocos` - Lista e gestão de blocos de estudo
-- `/blocos/[id]` - Detalhes do bloco com tópicos
-- `/topicos/[id]` - Detalhes do tópico com itens
-- `/itens` - Gestão completa de itens de estudo
-- `/estudo` - Timer Pomodoro para sessões
-- `/revisao` - Fila de revisão SRS
-
-## 🎯 Comandos Úteis
-
-```bash
-# Desenvolvimento
-npm run dev              # Servidor de desenvolvimento
-npm run build            # Build de produção
-npm run start            # Servidor de produção
-
-# Banco de Dados
-npm run db:generate      # Gerar cliente Prisma
-npm run db:migrate       # Executar migrações
-npm run db:studio        # Interface visual do banco
-npm run db:seed          # Popular com dados iniciais
-
-# Qualidade
-npm run lint             # Verificar código
-```
-
-## 📊 Métricas Disponíveis
-
-- **Progresso Geral**: Percentual de conclusão do edital
-- **Horas Estudadas**: Total e por período
-- **Taxa de Sucesso**: Percentual de acertos nas revisões
-- **Sequência de Estudos**: Dias consecutivos estudando
-- **Distribuição de Notas**: Análise das avaliações SRS
-- **Atividade por Dia**: Sessões e tempo por data
-
-## 🔄 Sistema SRS
-
-O sistema de repetição espaçada utiliza o algoritmo SM-2 simplificado:
-
-- **Notas 0-2**: Item volta para revisão em 1 dia
-- **Notas 3-4**: Intervalo moderado (2-4 dias)
-- **Nota 5**: Intervalo máximo baseado no fator de facilidade
-
-Cada revisão ajusta o fator de facilidade e o próximo intervalo automaticamente.
-
-## 🎨 Customização
-
-### Cores dos Blocos
-Edite as cores no seed ou diretamente no banco:
-```typescript
-const colors = [
-  '#3B82F6', // Azul
-  '#10B981', // Verde
-  '#F59E0B', // Amarelo
-  '#EF4444', // Vermelho
-  '#8B5CF6', // Roxo
-  '#06B6D4', // Ciano
-];
-```
-
-### Timer Pomodoro
-Ajuste os tempos no componente de estudo:
-```typescript
-const WORK_TIME = 25 * 60; // 25 minutos
-const BREAK_TIME = 5 * 60;  // 5 minutos
-```
-
-## 📄 Licença
-
-Este projeto está sob a licença ISC.
-
-## 🤝 Contribuição
-
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
-
----
-
-**Desenvolvido para otimizar seus estudos para concurso público! 📚✨**
+The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
