@@ -121,6 +121,21 @@ document.addEventListener('DOMContentLoaded', function() {
     var emptyState = document.getElementById('emptyState');
     var totalTopicsElement = document.getElementById('totalTopics');
     var totalStudyItemsElement = document.getElementById('totalStudyItems');
+    var initialTopics = @json($topicsSummary ?? []);
+    var initialMetrics = @json($disciplineMetrics ?? []);
+
+    if (initialMetrics.topics) {
+        totalTopicsElement.textContent = initialMetrics.topics.total;
+    }
+
+    if (initialMetrics.study_items) {
+        totalStudyItemsElement.textContent = initialMetrics.study_items.total;
+    }
+
+    if (initialTopics.length > 0) {
+        renderTopics(initialTopics);
+        loadingSpinner.classList.add('d-none');
+    }
 
     loadDisciplineData();
 
@@ -131,8 +146,8 @@ document.addEventListener('DOMContentLoaded', function() {
         ]).then(function(results) {
             var topicsData = results[0];
             var studyItemsData = results[1];
-            var topics = topicsData.data || [];
-            var studyItems = studyItemsData.data || [];
+            var topics = Array.isArray(topicsData) ? topicsData : (topicsData.data || []);
+            var studyItems = Array.isArray(studyItemsData) ? studyItemsData : (studyItemsData.data || []);
 
             totalTopicsElement.textContent = topics.length;
             totalStudyItemsElement.textContent = studyItems.length;
@@ -186,20 +201,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function getStatusColor(status) {
         var colors = {
-            'not_started': 'secondary',
-            'in_progress': 'warning',
-            'completed': 'success',
-            'reviewing': 'info'
+            'PLANNED': 'secondary',
+            'STUDYING': 'warning',
+            'REVIEW': 'info',
+            'COMPLETED': 'success'
         };
         return colors[status] || 'secondary';
     }
 
     function getStatusText(status) {
         var texts = {
-            'not_started': 'Não Iniciado',
-            'in_progress': 'Em Progresso',
-            'completed': 'Concluído',
-            'reviewing': 'Revisando'
+            'PLANNED': 'Planejado',
+            'STUDYING': 'Estudando',
+            'REVIEW': 'Revisão',
+            'COMPLETED': 'Concluído'
         };
         return texts[status] || status;
     }

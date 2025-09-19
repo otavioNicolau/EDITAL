@@ -26,6 +26,11 @@ class TopicController extends Controller
                 $query->where('block_id', $request->block_id);
             }
 
+            // Filter by discipline if provided
+            if ($request->filled('discipline_id')) {
+                $query->where('discipline_id', $request->discipline_id);
+            }
+
             // Filter by status if provided
             if ($request->has('status')) {
                 $query->where('status', $request->status);
@@ -44,6 +49,11 @@ class TopicController extends Controller
             // Filter by block if provided
             if ($request->has('block_id')) {
                 $query->where('block_id', $request->block_id);
+            }
+
+            // Filter by discipline if provided
+            if ($request->filled('discipline_id')) {
+                $query->where('discipline_id', $request->discipline_id);
             }
 
             // Filter by status if provided

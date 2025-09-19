@@ -31,9 +31,12 @@ Route::get('/blocks/{block}/edit', [BlockController::class, 'edit'])->name('bloc
 
 // Disciplines
 Route::get('/disciplines', [DisciplineController::class, 'index'])->name('disciplines.index');
-Route::get('/disciplines/create', function () { return view('disciplines.create'); })->name('disciplines.create');
+Route::get('/disciplines/create', [DisciplineController::class, 'create'])->name('disciplines.create');
+Route::post('/disciplines', [DisciplineController::class, 'store'])->name('disciplines.store');
 Route::get('/disciplines/{discipline}', [DisciplineController::class, 'show'])->name('disciplines.show');
-Route::get('/disciplines/{discipline}/edit', function ($discipline) { return view('disciplines.edit', compact('discipline')); })->name('disciplines.edit');
+Route::get('/disciplines/{discipline}/edit', [DisciplineController::class, 'edit'])->name('disciplines.edit');
+Route::put('/disciplines/{discipline}', [DisciplineController::class, 'update'])->name('disciplines.update');
+Route::delete('/disciplines/{discipline}', [DisciplineController::class, 'destroy'])->name('disciplines.destroy');
 
 // Topics
 Route::get('/topics', [TopicController::class, 'index'])->name('topics.index');

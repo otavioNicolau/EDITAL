@@ -26,6 +26,13 @@ class StudyItemController extends Controller
                 $query->where('topic_id', $request->topic_id);
             }
 
+            // Filter by discipline if provided
+            if ($request->filled('discipline_id')) {
+                $query->whereHas('topic', function ($topicQuery) use ($request) {
+                    $topicQuery->where('discipline_id', $request->discipline_id);
+                });
+            }
+
             // Filter by status if provided
             if ($request->has('status')) {
                 $query->where('status', $request->status);
@@ -56,6 +63,13 @@ class StudyItemController extends Controller
             // Filter by topic if provided
             if ($request->has('topic_id')) {
                 $query->where('topic_id', $request->topic_id);
+            }
+
+            // Filter by discipline if provided
+            if ($request->filled('discipline_id')) {
+                $query->whereHas('topic', function ($topicQuery) use ($request) {
+                    $topicQuery->where('discipline_id', $request->discipline_id);
+                });
             }
 
             // Filter by status if provided

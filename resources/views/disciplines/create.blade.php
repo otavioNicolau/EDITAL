@@ -21,6 +21,23 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
+                                    <label for="block_id" class="form-label">Bloco <span class="text-danger">*</span></label>
+                                    <select class="form-select @error('block_id') is-invalid @enderror" id="block_id" name="block_id" required>
+                                        <option value="">Selecione um bloco</option>
+                                        @foreach($blocks as $block)
+                                            <option value="{{ $block->id }}" {{ old('block_id', $selectedBlockId) == $block->id ? 'selected' : '' }}>
+                                                {{ $block->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('block_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
                                     <label for="name" class="form-label">Nome da Disciplina <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control @error('name') is-invalid @enderror" 
                                            id="name" name="name" value="{{ old('name') }}" required>
