@@ -205,15 +205,15 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const disciplinesHtml = filteredDisciplines.map(discipline => `
             <div class="col-lg-4 col-md-6 mb-4">
-                <div class="card h-100 shadow-sm">
+                <div class="card h-100 shadow-sm discipline-card cursor-pointer" data-url="/disciplines/${discipline.id}" tabindex="0">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start mb-3">
                             <h5 class="card-title mb-0">${discipline.name}</h5>
                             <div class="dropdown">
-                                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown" onclick="event.stopPropagation();">
                                     <i class="fas fa-ellipsis-v"></i>
                                 </button>
-                                <ul class="dropdown-menu">
+                                <ul class="dropdown-menu" onclick="event.stopPropagation();">
                                     <li><a class="dropdown-item" href="/disciplines/${discipline.id}">
                                         <i class="fas fa-eye me-2"></i>Visualizar
                                     </a></li>
@@ -221,7 +221,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                         <i class="fas fa-edit me-2"></i>Editar
                                     </a></li>
                                     <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item text-danger" href="#" onclick="showDeleteModal('${discipline.id}')">
+                                    <li><a class="dropdown-item text-danger" href="#" onclick="event.stopPropagation(); showDeleteModal('${discipline.id}')">
                                         <i class="fas fa-trash me-2"></i>Excluir
                                     </a></li>
                                 </ul>
@@ -272,6 +272,30 @@ document.addEventListener('DOMContentLoaded', function() {
         `).join('');
         
         disciplinesContainer.innerHTML = disciplinesHtml;
+        attachCardListeners();
+    }
+
+    function attachCardListeners() {
+        const cards = disciplinesContainer.querySelectorAll('.discipline-card');
+
+        cards.forEach(card => {
+            card.addEventListener('click', () => {
+                const url = card.dataset.url;
+                if (url) {
+                    window.location.href = url;
+                }
+            });
+
+            card.addEventListener('keydown', event => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    const url = card.dataset.url;
+                    if (url) {
+                        window.location.href = url;
+                    }
+                }
+            });
+        });
     }
 
     function showDeleteModal(disciplineId) {

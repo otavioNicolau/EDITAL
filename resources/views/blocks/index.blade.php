@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function renderBlocks(blocks) {
         blocksContainer.innerHTML = blocks.map(block => `
-            <div class="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow duration-200">
+            <div class="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow duration-200 block-card cursor-pointer" data-url="/blocks/${block.id}" tabindex="0">
                 <div class="px-4 py-5 sm:p-6">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-medium text-gray-900 truncate">${block.name}</h3>
@@ -161,15 +161,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     <div class="flex justify-between">
                         <a href="/blocks/${block.id}" 
-                           class="text-blue-600 hover:text-blue-500 text-sm font-medium">
+                           class="text-blue-600 hover:text-blue-500 text-sm font-medium"
+                           onclick="event.stopPropagation();">
                             <i class="fas fa-eye mr-1"></i>Visualizar
                         </a>
                         <div class="space-x-2">
                             <a href="/blocks/${block.id}/edit" 
-                               class="text-gray-600 hover:text-gray-500 text-sm">
+                               class="text-gray-600 hover:text-gray-500 text-sm"
+                               onclick="event.stopPropagation();">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <button onclick="deleteBlock(${block.id})" 
+                            <button onclick="event.stopPropagation(); deleteBlock(${block.id});" 
                                     class="text-red-600 hover:text-red-500 text-sm">
                                 <i class="fas fa-trash"></i>
                             </button>
@@ -178,6 +180,31 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             </div>
         `).join('');
+
+        attachBlockCardListeners();
+    }
+
+    function attachBlockCardListeners() {
+        const cards = blocksContainer.querySelectorAll('.block-card');
+
+        cards.forEach(card => {
+            card.addEventListener('click', () => {
+                const url = card.dataset.url;
+                if (url) {
+                    window.location.href = url;
+                }
+            });
+
+            card.addEventListener('keydown', event => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    const url = card.dataset.url;
+                    if (url) {
+                        window.location.href = url;
+                    }
+                }
+            });
+        });
     }
 
     function renderDisciplinesPreview(disciplines = []) {
