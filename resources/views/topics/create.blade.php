@@ -25,8 +25,10 @@
                     <h5 class="card-title mb-0">Informações do Tópico</h5>
                 </div>
                 <div class="card-body">
+                    @php($requestedDisciplineId = request()->query('discipline_id'))
                     <form id="createTopicForm">
                         @csrf
+                        <input type="hidden" id="block_id" name="block_id">
                         
                         <!-- Nome -->
                         <div class="mb-3">
@@ -45,25 +47,13 @@
                             <div class="invalid-feedback"></div>
                         </div>
 
-                        <!-- Bloco -->
-                        <div class="mb-3">
-                            <label for="block_id" class="form-label">Bloco <span class="text-danger">*</span></label>
-                            <select class="form-select" id="block_id" name="block_id" required>
-                                <option value="">Selecione um bloco</option>
-                                <!-- Será preenchido via JavaScript -->
-                            </select>
-                            <div class="form-text">Escolha o bloco ao qual este tópico pertence.</div>
-                            <div class="invalid-feedback"></div>
-                        </div>
-
                         <!-- Disciplina -->
                         <div class="mb-3">
                             <label for="discipline_id" class="form-label">Disciplina <span class="text-danger">*</span></label>
-                            <select class="form-select" id="discipline_id" name="discipline_id" required disabled>
+                            <select class="form-select" id="discipline_id" name="discipline_id" required>
                                 <option value="">Selecione uma disciplina</option>
-                                <!-- Será preenchido via JavaScript -->
                             </select>
-                            <div class="form-text">Escolha a disciplina dentro do bloco selecionado.</div>
+                            <div class="form-text">Escolha a disciplina; o bloco correspondente é definido automaticamente.</div>
                             <div class="invalid-feedback"></div>
                         </div>
 
@@ -142,7 +132,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('createTopicForm');
     const submitBtn = document.getElementById('submitBtn');
     const loadingOverlay = document.getElementById('loadingOverlay');
-    const blockSelect = document.getElementById('block_id');
+    const blockInput = document.getElementById('block_id');
     const disciplineSelect = document.getElementById('discipline_id');
 
     const params = new URLSearchParams(window.location.search);
@@ -153,8 +143,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadBlocks();
 
     form.addEventListener('submit', handleSubmit);
-    blockSelect.addEventListener('change', handleBlockChange);
-    disciplineSelect.addEventListener('change', syncBlockFromDiscipline);
+    disciplineSelect.addEventListener('change', handleDisciplineChange);
 
     async function loadBlocks() {
         try {
@@ -162,97 +151,103 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
             blocks = Array.isArray(data) ? data : (data.data || []);
 
-            populateBlockOptions();
+            populateDisciplineOptions();
             applyInitialSelection();
+            toggleSubmitState();
         } catch (error) {
             console.error('Erro ao carregar blocos:', error);
-            showError('Erro ao carregar blocos');
+            showError('Erro ao carregar blocos.');
+            submitBtn.disabled = true;
         }
     }
 
-    function populateBlockOptions() {
-        const options = blocks.map(block => `<option value="${block.id}">${block.name}</option>`).join('');
-        blockSelect.innerHTML = '<option value="">Selecione um bloco</option>' + options;
+    function populateDisciplineOptions() {
+        disciplineSelect.innerHTML = '<option value="">Selecione uma disciplina</option>';
 
-        if (blocks.length === 1) {
-            blockSelect.value = blocks[0].id;
-            populateDisciplineOptions(blocks[0].id);
-        }
-    }
+        blocks.forEach(block => {
+            if (!Array.isArray(block.disciplines) || block.disciplines.length === 0) {
+                return;
+            }
 
-    function populateDisciplineOptions(blockId) {
-        const block = blocks.find(item => String(item.id) === String(blockId));
-        const disciplines = block?.disciplines || [];
-        const options = disciplines.map(discipline => `<option value="${discipline.id}">${discipline.name}</option>`).join('');
-        disciplineSelect.innerHTML = '<option value="">Selecione uma disciplina</option>' + options;
-        disciplineSelect.disabled = disciplines.length === 0;
-    }
+            const group = document.createElement('optgroup');
+            group.label = block.name;
 
-    function handleBlockChange() {
-        const selectedBlockId = blockSelect.value;
-        populateDisciplineOptions(selectedBlockId);
-        disciplineSelect.value = '';
+            block.disciplines.forEach(discipline => {
+                const option = document.createElement('option');
+                option.value = discipline.id;
+                option.dataset.blockId = block.id;
+                option.textContent = discipline.name;
+                group.appendChild(option);
+            });
 
-        if (selectedBlockId && disciplineSelect.disabled) {
-            showError('Este bloco ainda não possui disciplinas cadastradas. Cadastre uma disciplina antes de criar tópicos.');
-        }
-    }
-
-    function syncBlockFromDiscipline() {
-        const selectedDisciplineId = disciplineSelect.value;
-        if (!selectedDisciplineId) {
-            return;
-        }
-
-        const ownerBlock = blocks.find(block => (block.disciplines || []).some(discipline => String(discipline.id) === String(selectedDisciplineId)));
-        if (ownerBlock && String(blockSelect.value) !== String(ownerBlock.id)) {
-            blockSelect.value = ownerBlock.id;
-            populateDisciplineOptions(ownerBlock.id);
-            disciplineSelect.value = selectedDisciplineId;
-        }
+            disciplineSelect.appendChild(group);
+        });
     }
 
     function applyInitialSelection() {
         if (preselectedDisciplineId) {
-            const ownerBlock = blocks.find(block => (block.disciplines || []).some(discipline => String(discipline.id) === String(preselectedDisciplineId)));
-
-            if (ownerBlock) {
-                blockSelect.value = ownerBlock.id;
-                populateDisciplineOptions(ownerBlock.id);
-                disciplineSelect.disabled = false;
+            const option = Array.from(disciplineSelect.options).find(opt => opt.value === preselectedDisciplineId);
+            if (option) {
                 disciplineSelect.value = preselectedDisciplineId;
+                updateBlockInput(option);
                 return;
             }
         }
 
         if (preselectedBlockId) {
-            const blockExists = blocks.some(block => String(block.id) === String(preselectedBlockId));
-            if (blockExists) {
-                blockSelect.value = preselectedBlockId;
-                populateDisciplineOptions(preselectedBlockId);
+            const block = blocks.find(item => String(item.id) === String(preselectedBlockId));
+            const firstDiscipline = block?.disciplines?.[0];
+            if (firstDiscipline) {
+                const option = Array.from(disciplineSelect.options).find(opt => opt.value == firstDiscipline.id);
+                disciplineSelect.value = String(firstDiscipline.id);
+                updateBlockInput(option);
                 return;
             }
         }
 
-        if (blockSelect.value) {
-            populateDisciplineOptions(blockSelect.value);
+        if (disciplineSelect.options.length === 2 && disciplineSelect.options[1].value) {
+            disciplineSelect.selectedIndex = 1;
+            updateBlockInput(disciplineSelect.options[1]);
+            return;
         }
+
+        blockInput.value = '';
+    }
+
+    function handleDisciplineChange() {
+        updateBlockInput(disciplineSelect.selectedOptions[0]);
+        toggleSubmitState();
+        clearDisciplineError();
+    }
+
+    function updateBlockInput(option) {
+        const blockId = option && option.dataset ? option.dataset.blockId : '';
+        blockInput.value = blockId || '';
+    }
+
+    function toggleSubmitState() {
+        submitBtn.disabled = !disciplineSelect.value;
     }
 
     async function handleSubmit(event) {
         event.preventDefault();
 
         clearErrors();
-        showLoading();
 
-        const disciplineWasDisabled = disciplineSelect.disabled;
-        if (disciplineWasDisabled) {
-            disciplineSelect.disabled = false;
+        if (!disciplineSelect.value) {
+            showDisciplineError('Selecione uma disciplina.');
+            toggleSubmitState();
+            return;
         }
 
+        showLoading();
+
         try {
+            updateBlockInput(disciplineSelect.selectedOptions[0]);
+
             const formData = new FormData(form);
             const data = Object.fromEntries(formData.entries());
+            data.block_id = blockInput.value;
 
             const response = await fetch('/api/topics', {
                 method: 'POST',
@@ -281,15 +276,22 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Erro ao criar tópico:', error);
             showError('Erro de conexão. Tente novamente.');
         } finally {
-            if (disciplineWasDisabled) {
-                disciplineSelect.disabled = true;
-            }
             hideLoading();
         }
     }
 
     function showValidationErrors(errors) {
         Object.entries(errors).forEach(([field, messages]) => {
+            if (field === 'block_id') {
+                showError(messages[0]);
+                return;
+            }
+
+            if (field === 'discipline_id') {
+                showDisciplineError(messages[0]);
+                return;
+            }
+
             const input = form.querySelector(`[name="${field}"]`);
             if (!input) {
                 return;
@@ -303,9 +305,26 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    function showDisciplineError(message) {
+        disciplineSelect.classList.add('is-invalid');
+        const feedback = disciplineSelect.closest('.mb-3')?.querySelector('.invalid-feedback');
+        if (feedback) {
+            feedback.textContent = message;
+        }
+    }
+
+    function clearDisciplineError() {
+        disciplineSelect.classList.remove('is-invalid');
+        const feedback = disciplineSelect.closest('.mb-3')?.querySelector('.invalid-feedback');
+        if (feedback) {
+            feedback.textContent = '';
+        }
+    }
+
     function clearErrors() {
         form.querySelectorAll('.is-invalid').forEach(element => element.classList.remove('is-invalid'));
         form.querySelectorAll('.invalid-feedback').forEach(element => element.textContent = '');
+        clearDisciplineError();
     }
 
     function showLoading() {

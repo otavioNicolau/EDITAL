@@ -20,25 +20,24 @@
 
             <div class="card">
                 <div class="card-body">
+                    @php
+                        $selectedBlockId = old('block_id', $discipline->block_id);
+                        $selectedBlock = $discipline->block ?? $blocks->firstWhere('id', $selectedBlockId);
+                    @endphp
                     <form action="{{ route('disciplines.update', $discipline) }}" method="POST">
                         @csrf
                         @method('PUT')
-                        
+                        <input type="hidden" name="block_id" value="{{ $selectedBlockId }}">
+
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="block_id" class="form-label">Bloco <span class="text-danger">*</span></label>
-                                    <select class="form-select @error('block_id') is-invalid @enderror" id="block_id" name="block_id" required>
-                                        @foreach($blocks as $block)
-                                            <option value="{{ $block->id }}" {{ old('block_id', $discipline->block_id) == $block->id ? 'selected' : '' }}>
-                                                {{ $block->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('block_id')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                                    <label class="form-label">Bloco</label>
+                                    <div class="form-control-plaintext">{{ $selectedBlock?->name }}</div>
                                 </div>
+                                @error('block_id')
+                                    <div class="text-danger small mb-3">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <div class="col-md-6">

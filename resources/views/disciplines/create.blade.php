@@ -15,25 +15,29 @@
 
             <div class="card">
                 <div class="card-body">
+                    @php
+                        $selectedBlockId = old('block_id', $selectedBlockId);
+                        $selectedBlock = $blocks->firstWhere('id', $selectedBlockId);
+                    @endphp
                     <form action="{{ route('disciplines.store') }}" method="POST">
                         @csrf
-                        
+                        <input type="hidden" name="block_id" value="{{ $selectedBlockId }}">
+
                         <div class="row">
                             <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="block_id" class="form-label">Bloco <span class="text-danger">*</span></label>
-                                    <select class="form-select @error('block_id') is-invalid @enderror" id="block_id" name="block_id" required>
-                                        <option value="">Selecione um bloco</option>
-                                        @foreach($blocks as $block)
-                                            <option value="{{ $block->id }}" {{ old('block_id', $selectedBlockId) == $block->id ? 'selected' : '' }}>
-                                                {{ $block->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('block_id')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
+                                @if($selectedBlock)
+                                    <div class="mb-3">
+                                        <label class="form-label">Bloco</label>
+                                        <div class="form-control-plaintext">{{ $selectedBlock->name }}</div>
+                                    </div>
+                                @else
+                                    <div class="alert alert-warning mb-3" role="alert">
+                                        Selecione um bloco acessando a página do bloco e criando a disciplina a partir dela.
+                                    </div>
+                                @endif
+                                @error('block_id')
+                                    <div class="text-danger small mb-3">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <div class="col-md-6">

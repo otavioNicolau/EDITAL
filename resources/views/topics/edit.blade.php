@@ -22,6 +22,7 @@
                     </div>
                     <div class="card-body">
                         <form id="topicEditForm">
+                            <input type="hidden" id="block_id" name="block_id">
                             <div class="row">
                                 <div class="col-md-8">
                                     <div class="mb-3">
@@ -43,18 +44,11 @@
                             </div>
 
                             <div class="mb-3">
-                                <label for="block_id" class="form-label">Bloco *</label>
-                                <select class="form-select" id="block_id" name="block_id" required>
-                                    <option value="">Selecione um bloco...</option>
-                                </select>
-                                <div class="invalid-feedback"></div>
-                            </div>
-
-                            <div class="mb-3">
                                 <label for="discipline_id" class="form-label">Disciplina *</label>
                                 <select class="form-select" id="discipline_id" name="discipline_id" required>
                                     <option value="">Selecione uma disciplina...</option>
                                 </select>
+                                <div class="form-text">O bloco correspondente é definido automaticamente.</div>
                                 <div class="invalid-feedback"></div>
                             </div>
 
@@ -136,7 +130,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     const topicId = window.location.pathname.split('/')[2]; // /topics/{id}/edit
     let currentTopic = null;
-    let blocks = [];
 
     // Elementos DOM
     const loadingSpinner = document.getElementById('loadingSpinner');
@@ -150,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Form elements
     const nameInput = document.getElementById('name');
     const statusSelect = document.getElementById('status');
-    const blockSelect = document.getElementById('block_id');
+    const blockInput = document.getElementById('block_id');
     const disciplineSelect = document.getElementById('discipline_id');
     const descriptionTextarea = document.getElementById('description');
     const tagsInput = document.getElementById('tags');
@@ -158,8 +151,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Event listeners
     topicEditForm.addEventListener('submit', handleSubmit);
     cancelBtn.addEventListener('click', handleCancel);
-    blockSelect.addEventListener('change', handleBlockChange);
-    disciplineSelect.addEventListener('change', syncBlockFromDiscipline);
+    disciplineSelect.addEventListener('change', handleDisciplineChange);
+    let blocks = [];
 
     // Carregar dados
     loadData();
@@ -168,7 +161,6 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             showLoading();
             
-            // Carregar tópico e blocos em paralelo
             const [topicResponse, blocksResponse] = await Promise.all([
                 fetch(`/api/topics/${topicId}`),
                 fetch('/api/blocks')
@@ -177,11 +169,15 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!topicResponse.ok) {
                 throw new Error('Tópico não encontrado');
             }
+            if (!blocksResponse.ok) {
+                throw new Error('Não foi possível carregar os blocos e disciplinas.');
+            }
 
             currentTopic = await topicResponse.json();
             const blocksData = await blocksResponse.json();
             blocks = Array.isArray(blocksData) ? blocksData : (blocksData.data || []);
 
+            populateDisciplineOptions();
             populateForm();
             renderTopicInfo();
             showForm();
@@ -192,78 +188,43 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function populateForm() {
-        renderBlockOptions();
-        syncBlockSelection();
-
         nameInput.value = currentTopic.name || '';
         statusSelect.value = currentTopic.status || 'PLANNED';
         descriptionTextarea.value = currentTopic.description || '';
         tagsInput.value = currentTopic.tags || '';
 
+        if (currentTopic.discipline_id) {
+            disciplineSelect.value = String(currentTopic.discipline_id);
+            updateBlockInput(disciplineSelect.selectedOptions[0]);
+        } else {
+            disciplineSelect.value = '';
+            blockInput.value = currentTopic.block_id || '';
+        }
+
         cancelBtn.href = `/topics/${topicId}`;
     }
 
-    function renderBlockOptions() {
-        blockSelect.innerHTML = '<option value="">Selecione um bloco...</option>';
-        blocks.forEach(block => {
-            const option = document.createElement('option');
-            option.value = block.id;
-            option.textContent = block.name;
-            blockSelect.appendChild(option);
-        });
-    }
-
-    function populateDisciplineOptions(blockId) {
-        const block = blocks.find(item => String(item.id) === String(blockId));
-        const disciplines = block?.disciplines || [];
-
+    function populateDisciplineOptions() {
         disciplineSelect.innerHTML = '<option value="">Selecione uma disciplina...</option>';
-        disciplines.forEach(discipline => {
-            const option = document.createElement('option');
-            option.value = discipline.id;
-            option.textContent = discipline.name;
-            disciplineSelect.appendChild(option);
+
+        blocks.forEach(block => {
+            if (!Array.isArray(block.disciplines) || block.disciplines.length === 0) {
+                return;
+            }
+
+            const group = document.createElement('optgroup');
+            group.label = block.name;
+
+            block.disciplines.forEach(discipline => {
+                const option = document.createElement('option');
+                option.value = discipline.id;
+                option.dataset.blockId = block.id;
+                option.textContent = discipline.name;
+                group.appendChild(option);
+            });
+
+            disciplineSelect.appendChild(group);
         });
-
-        disciplineSelect.disabled = disciplines.length === 0;
-    }
-
-    function syncBlockSelection() {
-        if (currentTopic.block_id) {
-            blockSelect.value = currentTopic.block_id;
-            populateDisciplineOptions(currentTopic.block_id);
-        } else {
-            populateDisciplineOptions('');
-        }
-
-        if (currentTopic.discipline_id) {
-            disciplineSelect.value = currentTopic.discipline_id;
-            disciplineSelect.disabled = false;
-        }
-    }
-
-    function handleBlockChange() {
-        const selectedBlockId = blockSelect.value;
-        populateDisciplineOptions(selectedBlockId);
-        disciplineSelect.value = '';
-
-        if (selectedBlockId && disciplineSelect.disabled) {
-            showError('Este bloco ainda não possui disciplinas cadastradas. Cadastre uma disciplina antes de associar o tópico.');
-        }
-    }
-
-    function syncBlockFromDiscipline() {
-        const selectedDisciplineId = disciplineSelect.value;
-        if (!selectedDisciplineId) {
-            return;
-        }
-
-        const ownerBlock = blocks.find(block => (block.disciplines || []).some(discipline => String(discipline.id) === String(selectedDisciplineId)));
-        if (ownerBlock && String(blockSelect.value) !== String(ownerBlock.id)) {
-            blockSelect.value = ownerBlock.id;
-            populateDisciplineOptions(ownerBlock.id);
-            disciplineSelect.value = selectedDisciplineId;
-        }
     }
 
     function renderTopicInfo() {
@@ -300,6 +261,16 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
     }
 
+    function handleDisciplineChange() {
+        updateBlockInput(disciplineSelect.selectedOptions[0]);
+        clearDisciplineError();
+    }
+
+    function updateBlockInput(option) {
+        const blockId = option && option.dataset ? option.dataset.blockId : '';
+        blockInput.value = blockId || '';
+    }
+
     async function handleSubmit(e) {
         e.preventDefault();
         
@@ -316,6 +287,14 @@ document.addEventListener('DOMContentLoaded', function() {
             // Preparar dados
             const formData = new FormData(topicEditForm);
             const data = Object.fromEntries(formData.entries());
+            if (!disciplineSelect.value) {
+                showDisciplineError('Selecione uma disciplina.');
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i class="fas fa-save me-2"></i>Salvar Alterações';
+                return;
+            }
+            updateBlockInput(disciplineSelect.selectedOptions[0]);
+            data.block_id = blockInput.value;
             
             // Fazer requisição
             const response = await fetch(`/api/topics/${topicId}`, {
@@ -367,7 +346,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return (
             nameInput.value !== (currentTopic.name || '') ||
             statusSelect.value !== (currentTopic.status || 'PLANNED') ||
-            String(blockSelect.value || '') !== String(currentTopic.block_id || '') ||
+            String(blockInput.value || '') !== String(currentTopic.block_id || '') ||
             String(disciplineSelect.value || '') !== String(currentTopic.discipline_id || '') ||
             descriptionTextarea.value !== (currentTopic.description || '') ||
             tagsInput.value !== (currentTopic.tags || '')
@@ -375,13 +354,23 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function showValidationErrors(errors) {
-        Object.keys(errors).forEach(field => {
+        Object.entries(errors).forEach(([field, messages]) => {
+            if (field === 'block_id') {
+                showError(messages[0]);
+                return;
+            }
+
+            if (field === 'discipline_id') {
+                showDisciplineError(messages[0]);
+                return;
+            }
+
             const input = document.getElementById(field);
             if (input) {
                 input.classList.add('is-invalid');
-                const feedback = input.parentNode.querySelector('.invalid-feedback');
-                if (feedback) {
-                    feedback.textContent = errors[field][0];
+                const fieldFeedback = input.closest('.mb-3')?.querySelector('.invalid-feedback');
+                if (fieldFeedback) {
+                    fieldFeedback.textContent = messages[0];
                 }
             }
         });
@@ -394,6 +383,23 @@ document.addEventListener('DOMContentLoaded', function() {
         topicEditForm.querySelectorAll('.invalid-feedback').forEach(element => {
             element.textContent = '';
         });
+        clearDisciplineError();
+    }
+
+    function showDisciplineError(message) {
+        disciplineSelect.classList.add('is-invalid');
+        const feedback = disciplineSelect.closest('.mb-3')?.querySelector('.invalid-feedback');
+        if (feedback) {
+            feedback.textContent = message;
+        }
+    }
+
+    function clearDisciplineError() {
+        disciplineSelect.classList.remove('is-invalid');
+        const feedback = disciplineSelect.closest('.mb-3')?.querySelector('.invalid-feedback');
+        if (feedback) {
+            feedback.textContent = '';
+        }
     }
 
     function showLoading() {
