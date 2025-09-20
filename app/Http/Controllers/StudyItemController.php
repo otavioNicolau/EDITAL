@@ -136,7 +136,7 @@ class StudyItemController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(StudyItem $studyItem): JsonResponse
+    public function show(Request $request, StudyItem $studyItem)
     {
         $studyItem->load([
             'topic:id,name,block_id',
@@ -146,7 +146,11 @@ class StudyItemController extends Controller
             }
         ]);
 
-        return response()->json($studyItem);
+        if ($request->is('api/*') || $request->wantsJson() || $request->ajax()) {
+            return response()->json($studyItem);
+        }
+
+        return view('study-items.show', compact('studyItem'));
     }
 
     /**

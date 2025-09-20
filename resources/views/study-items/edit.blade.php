@@ -239,7 +239,8 @@
 document.addEventListener('DOMContentLoaded', function() {
     let studyItem = null;
     let topics = [];
-    const itemId = window.location.pathname.split('/').pop();
+    const pathParts = window.location.pathname.split('/').filter(Boolean);
+    const itemId = pathParts[1]; // /study-items/{id}/edit
 
     // Elementos DOM
     const loading = document.getElementById('loading');

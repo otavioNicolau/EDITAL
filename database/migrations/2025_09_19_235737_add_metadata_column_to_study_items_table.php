@@ -25,6 +25,12 @@ return new class extends Migration
                 $table->integer('interval')->default(0)->after('ease');
             });
         }
+
+        if (! Schema::hasColumn('study_items', 'due_at')) {
+            Schema::table('study_items', function (Blueprint $table) {
+                $table->timestamp('due_at')->nullable()->after('interval');
+            });
+        }
     }
 
     /**

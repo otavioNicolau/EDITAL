@@ -282,7 +282,8 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     let studyItem = null;
-    const itemId = window.location.pathname.split('/').pop();
+    const pathParts = window.location.pathname.split('/').filter(Boolean);
+    const itemId = pathParts[1];
 
     // Elementos DOM
     const loading = document.getElementById('loading');
@@ -431,13 +432,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async function markAsReviewed() {
         try {
-            const response = await fetch(`/api/study-items/${itemId}/review`, {
+            const response = await fetch(`/api/reviews`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
-                body: JSON.stringify({ quality: 3 }) // Qualidade média
+                body: JSON.stringify({
+                    study_item_id: itemId,
+                    grade: 3
+                })
             });
 
             if (response.ok) {
@@ -455,7 +459,7 @@ document.addEventListener('DOMContentLoaded', function() {
     async function updateStatus(newStatus) {
         try {
             const response = await fetch(`/api/study-items/${itemId}/status`, {
-                method: 'PUT',
+                method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
@@ -481,7 +485,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         try {
             const response = await fetch(`/api/study-items/${itemId}/status`, {
-                method: 'PUT',
+                method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
