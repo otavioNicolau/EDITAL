@@ -7,6 +7,15 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## Integração Estratégia Concursos
+
+- **Variáveis .env**: defina `ESTRATEGIA_API_TOKEN=seu_token` e, se necessário, ajuste `ESTRATEGIA_API_BASE_URI` (padrão já configurado).
+- **Instalar dependências**: `composer install` e `npm install`.
+- **Assets com Vite**: use `npm run build` para produção ou `npm run dev` durante o desenvolvimento.
+- **Servidor local**: `php artisan serve` para acessar as novas páginas (`/` e `/curso/{id}`).
+- **Cache rápido**: `php artisan estrategia:sync-cursos` guarda a lista de concursos por 10 minutos.
+- **Testes**: `php artisan test` cobre páginas e serviço da integração.
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:

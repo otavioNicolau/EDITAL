@@ -8,6 +8,8 @@ use App\Http\Controllers\TopicController;
 use App\Http\Controllers\StudyItemController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\MetricsController;
+use App\Http\Controllers\ConcursosController;
+use App\Http\Controllers\CursosController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,8 +22,14 @@ use App\Http\Controllers\MetricsController;
 |
 */
 
-// Dashboard
-Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+// Concursos
+Route::get('/', [ConcursosController::class, 'index'])->name('concursos.index');
+Route::get('/concursos/{slug}', [ConcursosController::class, 'show'])->name('concursos.show');
+Route::get('/curso/{id}', [CursosController::class, 'show'])->name('cursos.show');
+Route::get('/curso/{curso}/aula/{slug}', [CursosController::class, 'aula'])->name('cursos.aula');
+
+// Dashboard (original)
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
 // Blocks
 Route::get('/blocks', [BlockController::class, 'index'])->name('blocks.index');

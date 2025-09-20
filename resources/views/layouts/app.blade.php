@@ -24,6 +24,7 @@
     <style>
         [x-cloak] { display: none !important; }
     </style>
+    @stack('styles')
 </head>
 <body class="bg-gray-50 min-h-screen">
     <!-- Navigation -->
@@ -33,7 +34,7 @@
                 <div class="flex">
                     <!-- Logo -->
                     <div class="flex-shrink-0 flex items-center">
-                        <a href="{{ route('dashboard') }}" class="text-xl font-bold text-blue-600">
+                        <a href="{{ route('concursos.index') }}" class="text-xl font-bold text-blue-600">
                             <i class="fas fa-graduation-cap mr-2"></i>
                             Estudo Concurso
                         </a>
@@ -41,6 +42,12 @@
                     
                     <!-- Navigation Links -->
                     <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                        <a href="{{ route('concursos.index') }}" 
+                           class="@if(request()->routeIs('concursos.*')) border-blue-500 text-gray-900 @else border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 @endif inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            <i class="fas fa-university mr-2"></i>
+                            Concursos
+                        </a>
+                        
                         <a href="{{ route('dashboard') }}" 
                            class="@if(request()->routeIs('dashboard')) border-blue-500 text-gray-900 @else border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 @endif inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                             <i class="fas fa-tachometer-alt mr-2"></i>
@@ -83,7 +90,6 @@
                             Métricas
                         </a>
                     </div>
-                </div>
                 
                 <!-- Mobile menu button -->
                 <div class="sm:hidden flex items-center">
@@ -97,6 +103,9 @@
         <!-- Mobile menu -->
         <div x-data="{ open: false }" x-on:toggle-mobile-menu.window="open = !open" x-show="open" x-cloak class="sm:hidden">
             <div class="pt-2 pb-3 space-y-1">
+                <a href="{{ route('concursos.index') }}" class="@if(request()->routeIs('concursos.*')) bg-blue-50 border-blue-500 text-blue-700 @else border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 @endif block pl-3 pr-4 py-2 border-l-4 text-base font-medium">
+                    <i class="fas fa-university mr-2"></i>Concursos
+                </a>
                 <a href="{{ route('dashboard') }}" class="@if(request()->routeIs('dashboard')) bg-blue-50 border-blue-500 text-blue-700 @else border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 @endif block pl-3 pr-4 py-2 border-l-4 text-base font-medium">
                     <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
                 </a>
@@ -118,6 +127,7 @@
                 <a href="{{ route('metrics.index') }}" class="@if(request()->routeIs('metrics.*')) bg-blue-50 border-blue-500 text-blue-700 @else border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 @endif block pl-3 pr-4 py-2 border-l-4 text-base font-medium">
                     <i class="fas fa-chart-line mr-2"></i>Métricas
                 </a>
+            </div>
             </div>
         </div>
     </nav>
@@ -154,7 +164,8 @@
     
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+    <script src="{{ asset('video-controls.js') }}" defer></script>
+
     @stack('scripts')
 </body>
 </html>

@@ -34,5 +34,9 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+    'estrategia' => [
+        'base_uri' => env('ESTRATEGIA_API_BASE_URI', 'https://api.estrategiaconcursos.com.br/api'),
+        'token' => env('ESTRATEGIA_API_TOKEN'),
+    ],
 
 ];

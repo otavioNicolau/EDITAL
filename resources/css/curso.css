@@ -1,0 +1,38 @@
+.curso-header {
+    background: linear-gradient(135deg, #f8fafc, #ffffff);
+}
+
+.curso-modulos .modulo + .modulo {
+    margin-top: 1.5rem;
+}
+
+.aula-card .card-body {
+    background-color: #fefefe;
+}
+
+.aula-card video {
+    width: 100%;
+    border-radius: .5rem;
+}
+
+.video-player [data-video-switch] button,
+.video-player [data-resolution-switch] button {
+    flex: 1 1 120px;
+    min-width: 120px;
+}
+
+.feedback-message {
+    transition: opacity .3s ease-in-out;
+}
+
+.feedback-message.fade-out {
+    opacity: 0;
+}
+
+@media (max-width: 576px) {
+    .video-player [data-video-switch] button,
+    .video-player [data-resolution-switch] button {
+        flex: 1 1 100%;
+        min-width: 100%;
+    }
+}
