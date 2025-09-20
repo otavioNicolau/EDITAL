@@ -15,15 +15,19 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        
+        \App\Models\User::firstOrCreate(
+            ['email' => 'test@example.com'],
+            [
+                'name' => 'Test User',
+                'password' => bcrypt('password'),
+                'email_verified_at' => now(),
+            ]
+        );
 
         // Executar seeders na ordem correta
         $this->call([
-            DisciplineSeeder::class,
-            StudyDataSeeder::class,
+            PRFEditalSeeder::class,
         ]);
     }
 }
