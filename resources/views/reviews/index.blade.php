@@ -431,14 +431,14 @@ function renderReviews() {
                     ${review.grade} - ${getGradeLabel(review.grade)}
                 </span>
             </td>
-            <td>
-                <span class="text-muted">
-                    ${review.ease_before?.toFixed(2)} → ${review.ease_after?.toFixed(2)}
+           <td>
+               <span class="text-muted">
+                    ${formatEase(review.ease_before)} → ${formatEase(review.ease_after)}
                 </span>
             </td>
             <td>
                 <span class="text-muted">
-                    ${review.interval_before}d → ${review.interval_after}d
+                    ${formatInterval(review.interval_before)}d → ${formatInterval(review.interval_after)}d
                 </span>
             </td>
             <td>
@@ -516,6 +516,20 @@ function changePage(page) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+function formatEase(value) {
+    if (value === null || value === undefined) {
+        return '-';
+    }
+
+    const numeric = Number(value);
+    return Number.isFinite(numeric) ? numeric.toFixed(2) : '-';
+}
+
+function formatInterval(value) {
+    const numeric = Number(value);
+    return Number.isFinite(numeric) ? numeric : 0;
+}
+
 // Show review detail modal
 async function showReviewDetail(reviewId) {
     try {
@@ -556,11 +570,11 @@ async function showReviewDetail(reviewId) {
                     <table class="table table-sm">
                         <tr>
                             <td><strong>Facilidade:</strong></td>
-                            <td>${review.ease_before?.toFixed(2)} → ${review.ease_after?.toFixed(2)}</td>
+                            <td>${formatEase(review.ease_before)} → ${formatEase(review.ease_after)}</td>
                         </tr>
                         <tr>
                             <td><strong>Intervalo:</strong></td>
-                            <td>${review.interval_before} dias → ${review.interval_after} dias</td>
+                            <td>${formatInterval(review.interval_before)} dias → ${formatInterval(review.interval_after)} dias</td>
                         </tr>
                         <tr>
                             <td><strong>Vencimento:</strong></td>
