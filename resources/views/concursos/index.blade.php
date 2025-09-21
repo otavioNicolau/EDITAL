@@ -7,7 +7,7 @@
     <div class="text-center mb-4">
         <div class="d-inline-flex align-items-center gap-3 mb-2">
             <span class="badge bg-primary rounded-circle p-3"><i class="fas fa-university"></i></span>
-            <h1 class="h3 fw-semibold mb-0">Catálogo de Concursos</h1>
+            <h1 class="h3 fw-semibold mb-0">Catálogo de Cursos</h1>
         </div>
         <p class="text-muted mb-0">Integração direta com a API do Estratégia Concursos</p>
     </div>

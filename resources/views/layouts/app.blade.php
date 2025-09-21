@@ -36,7 +36,7 @@
                     <div class="flex-shrink-0 flex items-center">
                         <a href="{{ route('concursos.index') }}" class="text-xl font-bold text-blue-600">
                             <i class="fas fa-graduation-cap mr-2"></i>
-                            Estudo Concurso
+                            PROJETO PRF
                         </a>
                     </div>
                     
@@ -47,12 +47,12 @@
                             <i class="fas fa-university mr-2"></i>
                             CURSOS                        </a>
                         
-                        <a href="{{ route('dashboard') }}" 
+                        {{-- <a href="{{ route('dashboard') }}" 
                            class="@if(request()->routeIs('dashboard')) border-blue-500 text-gray-900 @else border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 @endif inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                             <i class="fas fa-tachometer-alt mr-2"></i>
                             DASHBOARD
                         </a>
-                        
+                         --}}
                         <a href="{{ route('blocks.index') }}" 
                            class="@if(request()->routeIs('blocks.*')) border-blue-500 text-gray-900 @else border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 @endif inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                             <i class="fas fa-cube mr-2"></i>
