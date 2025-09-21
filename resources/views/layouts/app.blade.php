@@ -45,7 +45,7 @@
                         <a href="{{ route('concursos.index') }}" 
                            class="@if(request()->routeIs('concursos.*')) border-blue-500 text-gray-900 @else border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 @endif inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                             <i class="fas fa-university mr-2"></i>
-                            CURSOS                        </a>
+                            CURSOS</a>
                         
                         {{-- <a href="{{ route('dashboard') }}" 
                            class="@if(request()->routeIs('dashboard')) border-blue-500 text-gray-900 @else border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 @endif inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
@@ -103,15 +103,15 @@
         <div x-data="{ open: false }" x-on:toggle-mobile-menu.window="open = !open" x-show="open" x-cloak class="sm:hidden">
             <div class="pt-2 pb-3 space-y-1">
                 <a href="{{ route('concursos.index') }}" class="@if(request()->routeIs('concursos.*')) bg-blue-50 border-blue-500 text-blue-700 @else border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 @endif block pl-3 pr-4 py-2 border-l-4 text-base font-medium">
-                    <i class="fas fa-university mr-2"></i>Concursos
+                    <i class="fas fa-university mr-2"></i>CURSOS
                 </a>
-                <a href="{{ route('dashboard') }}" class="@if(request()->routeIs('dashboard')) bg-blue-50 border-blue-500 text-blue-700 @else border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 @endif block pl-3 pr-4 py-2 border-l-4 text-base font-medium">
+                {{-- <a href="{{ route('dashboard') }}" class="@if(request()->routeIs('dashboard')) bg-blue-50 border-blue-500 text-blue-700 @else border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 @endif block pl-3 pr-4 py-2 border-l-4 text-base font-medium">
                     <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
-                </a>
+                </a> --}}
                 <a href="{{ route('blocks.index') }}" class="@if(request()->routeIs('blocks.*')) bg-blue-50 border-blue-500 text-blue-700 @else border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 @endif block pl-3 pr-4 py-2 border-l-4 text-base font-medium">
-                    <i class="fas fa-cube mr-2"></i>Blocos
+                    <i class="fas fa-cube mr-2"></i>EDITAL
                 </a>
-                <a href="{{ route('disciplines.index') }}" class="@if(request()->routeIs('disciplines.*')) bg-blue-50 border-blue-500 text-blue-700 @else border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 @endif block pl-3 pr-4 py-2 border-l-4 text-base font-medium">
+                {{-- <a href="{{ route('disciplines.index') }}" class="@if(request()->routeIs('disciplines.*')) bg-blue-50 border-blue-500 text-blue-700 @else border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 @endif block pl-3 pr-4 py-2 border-l-4 text-base font-medium">
                     <i class="fas fa-graduation-cap mr-2"></i>Disciplinas
                 </a>
                 <a href="{{ route('topics.index') }}" class="@if(request()->routeIs('topics.*')) bg-blue-50 border-blue-500 text-blue-700 @else border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 @endif block pl-3 pr-4 py-2 border-l-4 text-base font-medium">
@@ -125,7 +125,7 @@
                 </a>
                 <a href="{{ route('metrics.index') }}" class="@if(request()->routeIs('metrics.*')) bg-blue-50 border-blue-500 text-blue-700 @else border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 @endif block pl-3 pr-4 py-2 border-l-4 text-base font-medium">
                     <i class="fas fa-chart-line mr-2"></i>Métricas
-                </a>
+                </a> --}}
             </div>
             </div>
         </div>
