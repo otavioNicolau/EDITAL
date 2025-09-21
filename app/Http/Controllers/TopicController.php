@@ -20,7 +20,7 @@ class TopicController extends Controller
         // Se for uma requisição da API (prefixo /api/), retorna JSON
         if ($request->is('api/*')) {
             $query = Topic::with(['block:id,name', 'discipline:id,name,block_id'])
-                         ->withCount(['studyItems', 'reviews']);
+                ->withCount(['studyItems', 'reviews']);
 
             // Filter by block if provided
             if ($request->has('block_id')) {
@@ -45,7 +45,7 @@ class TopicController extends Controller
         // Se for uma requisição AJAX explícita (com X-Requested-With), retorna JSON
         if ($request->ajax()) {
             $query = Topic::with(['block:id,name', 'discipline:id,name,block_id'])
-                         ->withCount(['studyItems', 'reviews']);
+                ->withCount(['studyItems', 'reviews']);
 
             // Filter by block if provided
             if ($request->has('block_id')) {
@@ -76,6 +76,7 @@ class TopicController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
+
         try {
             $validated = $request->validate([
                 'name' => 'required|string|min:1',
@@ -106,7 +107,7 @@ class TopicController extends Controller
             ]);
 
             $topic->load(['block:id,name', 'discipline:id,name,block_id']);
-            
+
             return response()->json($topic, 201);
         } catch (ValidationException $e) {
             return response()->json([
@@ -146,7 +147,7 @@ class TopicController extends Controller
 
             return response()->json($topic);
         }
-        
+
         // Para todas as outras requisições web, retorna a view
         return view('topics.show', compact('topic'));
     }
@@ -156,6 +157,9 @@ class TopicController extends Controller
      */
     public function update(Request $request, Topic $topic): JsonResponse
     {
+
+
+
         try {
             $validated = $request->validate([
                 'name' => 'sometimes|required|string|min:1',
@@ -182,7 +186,7 @@ class TopicController extends Controller
 
             $topic->update($validated);
             $topic->load(['block:id,name', 'discipline:id,name,block_id']);
-            
+
             return response()->json($topic);
         } catch (ValidationException $e) {
             return response()->json([
@@ -208,7 +212,7 @@ class TopicController extends Controller
     {
         try {
             $topic->delete();
-            
+
             return response()->json([
                 'message' => 'Tópico excluído com sucesso'
             ]);
@@ -223,6 +227,25 @@ class TopicController extends Controller
     /**
      * Update topic status
      */
+    // public function updateStatus(Request $request, Topic $topic): JsonResponse
+    // {
+    //     try {
+    //         $validated = $request->validate([
+    //             'status' => ['required', Rule::in(['PLANNED', 'STUDYING', 'REVIEW', 'COMPLETED'])],
+    //         ]);
+
+    //         $topic->update(['status' => $validated['status']]);
+
+    //         return response()->json($topic);
+
+    //     } catch (ValidationException $e) {
+    //         return response()->json([
+    //             'error' => 'Status inválido',
+    //             'details' => $e->errors()
+    //         ], 422);
+    //     }
+    // }
+
     public function updateStatus(Request $request, Topic $topic): JsonResponse
     {
         try {
@@ -230,13 +253,20 @@ class TopicController extends Controller
                 'status' => ['required', Rule::in(['PLANNED', 'STUDYING', 'REVIEW', 'COMPLETED'])],
             ]);
 
-            $topic->update(['status' => $validated['status']]);
+            // Evita MassAssignment — seta e salva
+            $topic->status = $validated['status'];
+            $topic->save();
+
+            return response()->json([
+                'ok'     => true,
+                'status' => $topic->status,
+                'id'     => $topic->id,
+            ], 200);
             
-            return response()->json($topic);
         } catch (ValidationException $e) {
             return response()->json([
-                'error' => 'Status inválido',
-                'details' => $e->errors()
+                'error'   => 'Status inválido',
+                'details' => $e->errors(),
             ], 422);
         }
     }
