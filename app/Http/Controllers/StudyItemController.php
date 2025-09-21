@@ -103,6 +103,8 @@ class StudyItemController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
+
+        
         try {
             $validated = $request->validate([
                 'title' => 'required|string|min:1',
@@ -125,6 +127,7 @@ class StudyItemController extends Controller
             $studyItem->load(['topic:id,name,block_id', 'topic.block:id,name']);
 
             return response()->json($studyItem, 201);
+
         } catch (ValidationException $e) {
             return response()->json([
                 'error' => 'Dados inválidos',

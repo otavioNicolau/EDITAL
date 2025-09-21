@@ -45,22 +45,21 @@
                         <a href="{{ route('concursos.index') }}" 
                            class="@if(request()->routeIs('concursos.*')) border-blue-500 text-gray-900 @else border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 @endif inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                             <i class="fas fa-university mr-2"></i>
-                            Concursos
-                        </a>
+                            CURSOS                        </a>
                         
                         <a href="{{ route('dashboard') }}" 
                            class="@if(request()->routeIs('dashboard')) border-blue-500 text-gray-900 @else border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 @endif inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                             <i class="fas fa-tachometer-alt mr-2"></i>
-                            Dashboard
+                            DASHBOARD
                         </a>
                         
                         <a href="{{ route('blocks.index') }}" 
                            class="@if(request()->routeIs('blocks.*')) border-blue-500 text-gray-900 @else border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 @endif inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                             <i class="fas fa-cube mr-2"></i>
-                            Blocos
+                            EDITAL
                         </a>
                         
-                        <a href="{{ route('disciplines.index') }}" 
+                        {{-- <a href="{{ route('disciplines.index') }}" 
                            class="@if(request()->routeIs('disciplines.*')) border-blue-500 text-gray-900 @else border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 @endif inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                             <i class="fas fa-graduation-cap mr-2"></i>
                             Disciplinas
@@ -70,25 +69,25 @@
                            class="@if(request()->routeIs('topics.*')) border-blue-500 text-gray-900 @else border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 @endif inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                             <i class="fas fa-list mr-2"></i>
                             Tópicos
-                        </a>
+                        </a> --}}
                         
-                        <a href="{{ route('study-items.index') }}" 
+                        {{-- <a href="{{ route('study-items.index') }}" 
                            class="@if(request()->routeIs('study-items.*')) border-blue-500 text-gray-900 @else border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 @endif inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                             <i class="fas fa-book mr-2"></i>
                             Itens de Estudo
-                        </a>
+                        </a> --}}
                         
-                        <a href="{{ route('reviews.index') }}" 
+                        {{-- <a href="{{ route('reviews.index') }}" 
                            class="@if(request()->routeIs('reviews.*')) border-blue-500 text-gray-900 @else border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 @endif inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                             <i class="fas fa-redo mr-2"></i>
                             Revisões
                         </a>
-                        
-                        <a href="{{ route('metrics.index') }}" 
+                         --}}
+                        {{-- <a href="{{ route('metrics.index') }}" 
                            class="@if(request()->routeIs('metrics.*')) border-blue-500 text-gray-900 @else border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 @endif inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                             <i class="fas fa-chart-line mr-2"></i>
                             Métricas
-                        </a>
+                        </a> --}}
                     </div>
                 
                 <!-- Mobile menu button -->
